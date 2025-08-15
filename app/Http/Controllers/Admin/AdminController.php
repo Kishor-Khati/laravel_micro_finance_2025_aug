@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Member;
+use App\Models\Loan;
+use App\Models\SavingsAccount;
+use App\Models\Transaction;
+use App\Models\Branch;
+use Illuminate\Http\Request;
+
+class AdminController extends Controller
+{
+    public function dashboard()
+    {
+        $stats = [
+            'total_users' => User::count(),
+            'total_members' => Member::count(),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'total_savings' => SavingsAccount::sum('balance'),
+            'total_branches' => Branch::count(),
+            'recent_transactions' => Transaction::orderBy('created_at', 'desc')->take(5)->get(),
+            'monthly_loans' => Loan::whereMonth('created_at', date('m'))->count(),
+            'monthly_savings' => SavingsAccount::whereMonth('created_at', date('m'))->sum('balance'),
+        ];
+
+        return view('admin.dashboard', compact('stats'));
+    }
+
+    public function users()
+    {
+        $users = User::with('branch')->paginate(10);
+        return view('admin.users.index', compact('users'));
+    }
+
+    public function createUser()
+    {
+        $branches = Branch::all();
+        return view('admin.users.create', compact('branches'));
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string|in:super_admin,branch_manager,field_officer,accountant,member',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'branch_id' => $request->branch_id,
+        ]);
+
+        return redirect()->route('admin.users')->with('success', 'User created successfully!');
+    }
+
+    public function editUser(User $user)
+    {
+        $branches = Branch::all();
+        return view('admin.users.edit', compact('user', 'branches'));
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|string|in:super_admin,branch_manager,field_officer,accountant,member',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $user->update($request->only(['name', 'email', 'role', 'branch_id']));
+
+        return redirect()->route('admin.users')->with('success', 'User updated successfully!');
+    }
+
+    public function deleteUser(User $user)
+    {
+        $user->delete();
+        return redirect()->route('admin.users')->with('success', 'User deleted successfully!');
+    }
+}
