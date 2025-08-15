@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-members')->only(['index', 'show']);
+        $this->middleware('permission:create-members')->only(['create', 'store']);
+        $this->middleware('permission:edit-members')->only(['edit', 'update']);
+        $this->middleware('permission:delete-members')->only(['destroy']);
+    }
+    
     public function index()
     {
         $members = Member::with('branch')->paginate(15);

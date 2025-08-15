@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\App;
 
 class LanguageController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     public function switch(Request $request)
     {
         $language = $request->input('language');

@@ -11,6 +11,15 @@ use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-loans')->only(['index', 'show']);
+        $this->middleware('permission:create-loans')->only(['create', 'store']);
+        $this->middleware('permission:approve-loans')->only(['approve']);
+        $this->middleware('permission:manage-loans')->only(['disburse', 'reject', 'close']);
+    }
+    
     public function index()
     {
         $loans = Loan::with(['member', 'loanType'])->paginate(15);

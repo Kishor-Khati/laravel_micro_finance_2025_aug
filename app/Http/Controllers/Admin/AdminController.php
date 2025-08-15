@@ -13,6 +13,13 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:access-dashboard')->only(['dashboard']);
+        $this->middleware('permission:manage-users')->only(['users', 'createUser', 'storeUser', 'editUser', 'updateUser', 'deleteUser']);
+    }
+    
     public function dashboard()
     {
         $stats = [

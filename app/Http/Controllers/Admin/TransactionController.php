@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-transactions')->only(['index', 'show']);
+        $this->middleware('permission:create-transactions')->only(['create', 'store']);
+        $this->middleware('permission:manage-transactions')->only(['edit', 'update', 'destroy']);
+    }
+    
     public function index()
     {
         $transactions = Transaction::with(['savingsAccount.member'])

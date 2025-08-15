@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Member Selection -->
                 <div>
-                    <label for="member_id" class="block text-sm font-medium text-gray-700">Member</label>
+                    <x-required-label for="member_id" value="Member" />
                     <select name="member_id" id="member_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Member</option>
@@ -28,7 +28,7 @@
 
                 <!-- Savings Type -->
                 <div>
-                    <label for="savings_type_id" class="block text-sm font-medium text-gray-700">Savings Type</label>
+                    <x-required-label for="savings_type_id" value="Savings Type" />
                     <select name="savings_type_id" id="savings_type_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Savings Type</option>
@@ -45,7 +45,7 @@
 
                 <!-- Account Number -->
                 <div>
-                    <label for="account_number" class="block text-sm font-medium text-gray-700">Account Number</label>
+                    <x-required-label for="account_number" value="Account Number" />
                     <input type="text" name="account_number" id="account_number" value="{{ old('account_number') }}" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <p class="mt-1 text-sm text-gray-500">Unique account identifier</p>
@@ -56,7 +56,7 @@
 
                 <!-- Initial Balance -->
                 <div>
-                    <label for="balance" class="block text-sm font-medium text-gray-700">Initial Balance (रू)</label>
+                    <x-required-label for="balance" value="Initial Balance (रू)" />
                     <input type="number" name="balance" id="balance" value="{{ old('balance', '0') }}" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('balance')
@@ -66,7 +66,7 @@
 
                 <!-- Interest Rate -->
                 <div>
-                    <label for="interest_rate" class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
+                    <x-required-label for="interest_rate" value="Interest Rate (%)" />
                     <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" step="0.01" min="0" max="100" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('interest_rate')
@@ -76,7 +76,7 @@
 
                 <!-- Status -->
                 <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700">Account Status</label>
+                    <x-required-label for="status" value="Account Status" />
                     <select name="status" id="status" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>

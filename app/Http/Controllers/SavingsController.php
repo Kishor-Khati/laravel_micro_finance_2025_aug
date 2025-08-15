@@ -13,13 +13,21 @@ use Illuminate\Support\Facades\DB;
 
 class SavingsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-savings')->only(['index', 'show']);
+        $this->middleware('permission:create-savings')->only(['create', 'store']);
+        $this->middleware('permission:manage-savings')->only(['deposit', 'withdraw']);
+    }
+    
     public function index(Request $request)
     {
         $query = SavingsAccount::with(['member', 'savingsType', 'branch'])
             ->orderBy('created_at', 'desc');
             
-        // Apply branch filter for non-super-admin users
-        if (!Auth::user()->isSuperAdmin()) {
+        // Apply branch filter for users without all-branches permission
+        if (!Auth::user()->hasPermission('view-all-branches')) {
             $query->where('branch_id', Auth::user()->branch_id);
         }
         

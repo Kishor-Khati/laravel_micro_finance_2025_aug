@@ -10,13 +10,22 @@ use Illuminate\Support\Facades\Storage;
 
 class MemberController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-members')->only(['index', 'show']);
+        $this->middleware('permission:create-members')->only(['create', 'store']);
+        $this->middleware('permission:edit-members')->only(['edit', 'update']);
+        $this->middleware('permission:delete-members')->only(['destroy']);
+    }
+    
     public function index(Request $request)
     {
         $query = Member::with(['branch'])
             ->orderBy('created_at', 'desc');
             
-        // Apply branch filter for non-super-admin users
-        if (!Auth::user()->isSuperAdmin()) {
+        // Apply branch filter for users without all-branches permission
+        if (!Auth::user()->hasPermission('view-all-branches')) {
             $query->where('branch_id', Auth::user()->branch_id);
         }
         

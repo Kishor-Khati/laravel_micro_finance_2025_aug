@@ -11,6 +11,14 @@ use Illuminate\Http\Request;
 
 class SavingsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-savings')->only(['index', 'show']);
+        $this->middleware('permission:create-savings')->only(['create', 'store']);
+        $this->middleware('permission:manage-savings')->only(['deposit', 'withdraw']);
+    }
+    
     public function index()
     {
         $savingsAccounts = SavingsAccount::with(['member', 'savingsType'])->paginate(15);

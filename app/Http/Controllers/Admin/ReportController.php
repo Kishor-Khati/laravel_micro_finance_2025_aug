@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:view-reports');
+    }
+    
     public function index()
     {
         return view('admin.reports.index');

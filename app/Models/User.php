@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'role_id',
         'branch_id',
         'employee_id',
         'phone',
@@ -60,6 +61,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Branch::class);
     }
+    
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
 
     public function approvedLoans(): HasMany
     {
@@ -87,34 +93,61 @@ class User extends Authenticatable
         return $query->where('status', 'active');
     }
 
-    public function scopeByRole($query, $role)
+    public function scopeByRole($query, $roleSlug)
     {
-        return $query->where('role', $role);
+        return $query->whereHas('role', function($q) use ($roleSlug) {
+            $q->where('slug', $roleSlug);
+        });
     }
 
     // Methods
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return $this->role()->exists() && $this->role->slug === 'super-admin';
+    }
+    
+    public function hasPermission($permission): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+        
+        return $this->role()->exists() && $this->role->hasPermission($permission);
+    }
+    
+    public function can($abilities, $arguments = [])
+    {
+        // If $abilities is an array/iterable, check if user has any of the abilities
+        if (is_iterable($abilities)) {
+            foreach ($abilities as $ability) {
+                if ($this->hasPermission($ability)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Otherwise, treat it as a single permission check
+        return $this->hasPermission($abilities);
     }
 
     public function isBranchManager(): bool
     {
-        return $this->role === 'branch_manager';
+        return $this->role()->exists() && $this->role->slug === 'branch-manager';
     }
 
     public function isFieldOfficer(): bool
     {
-        return $this->role === 'field_officer';
+        return $this->role()->exists() && $this->role->slug === 'field-officer';
     }
 
     public function isAccountant(): bool
     {
-        return $this->role === 'accountant';
+        return $this->role()->exists() && $this->role->slug === 'accountant';
     }
 
     public function isMember(): bool
     {
-        return $this->role === 'member';
+        return $this->role()->exists() && $this->role->slug === 'member';
     }
 }
