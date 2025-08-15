@@ -9,17 +9,11 @@ use App\Models\Loan;
 use App\Models\SavingsAccount;
 use App\Models\Transaction;
 use App\Models\Branch;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:access-dashboard')->only(['dashboard']);
-        $this->middleware('permission:manage-users')->only(['users', 'createUser', 'storeUser', 'editUser', 'updateUser', 'deleteUser']);
-    }
-    
     public function dashboard()
     {
         $stats = [
@@ -34,6 +28,52 @@ class AdminController extends Controller
         ];
 
         return view('admin.dashboard', compact('stats'));
+    }
+    
+    public function formDemo(Request $request)
+    {
+        // If the form is submitted, validate the inputs
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'age' => 'nullable|numeric|min:18|max:100',
+                'country' => 'required|string',
+                'bio' => 'nullable|string|max:1000',
+                'gender' => 'required|in:male,female,other',
+                'terms' => 'required|accepted',
+            ]);
+            
+            return redirect()->route('admin.form-demo')
+                ->with('success', 'Form submitted successfully!');
+        }
+        
+        return view('components.form-demo');
+    }
+    
+    /**
+     * Display the form components documentation page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function formDocumentation()
+    {
+        return view('components.form-documentation');
+    }
+    
+    /**
+     * Display the SweetAlert demo page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function sweetAlertDemo()
+    {
+        return view('components.sweet-alert-demo');
+    }
+
+    public function sweetAlertDocumentation()
+    {
+        return view('components.sweet-alert-documentation');
     }
 
     public function users()

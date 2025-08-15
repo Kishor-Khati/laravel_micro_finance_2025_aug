@@ -4,21 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SavingsAccount;
-use App\Models\Member;
 use App\Models\SavingsType;
+use App\Models\Member;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SavingsController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view-savings')->only(['index', 'show']);
-        $this->middleware('permission:create-savings')->only(['create', 'store']);
-        $this->middleware('permission:manage-savings')->only(['deposit', 'withdraw']);
-    }
-    
     public function index()
     {
         $savingsAccounts = SavingsAccount::with(['member', 'savingsType'])->paginate(15);
@@ -37,15 +30,38 @@ class SavingsController extends Controller
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'savings_type_id' => 'required|exists:savings_types,id',
-            'account_number' => 'required|string|unique:savings_accounts',
             'balance' => 'required|numeric|min:0',
-            'interest_rate' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:active,inactive,closed',
         ]);
+        
+        $savingsType = SavingsType::findOrFail($request->savings_type_id);
+        
+        $data = $request->all();
+        $data['account_number'] = $this->generateAccountNumber();
+        $data['interest_rate'] = $savingsType->interest_rate;
+        $data['opened_date'] = now();
+        
+        $savingsAccount = SavingsAccount::create($data);
+        
+        // Create initial deposit transaction if balance > 0
+        if ($request->balance > 0) {
+            Transaction::create([
+                'transaction_number' => $this->generateTransactionNumber(),
+                'member_id' => $request->member_id,
+                'branch_id' => Auth::check() ? Auth::user()->branch_id : null,
+                'transaction_type' => 'deposit',
+                'amount' => $request->balance,
+                'balance_before' => 0,
+                'balance_after' => $request->balance,
+                'reference_type' => 'savings_account',
+                'reference_id' => $savingsAccount->id,
+                'description' => "Initial deposit for account #{$savingsAccount->account_number}",
+                'processed_by' => Auth::check() ? Auth::user()->id : null,
+                'transaction_date' => now(),
+            ]);
+        }
 
-        SavingsAccount::create($request->all());
-
-        return redirect()->route('admin.savings')->with('success', 'Savings account created successfully!');
+        return redirect()->route('admin.savings.index')->with('success', 'Savings account created successfully!');
     }
 
     public function show(SavingsAccount $savingsAccount)
@@ -74,13 +90,13 @@ class SavingsController extends Controller
 
         $savingsAccount->update($request->all());
 
-        return redirect()->route('admin.savings')->with('success', 'Savings account updated successfully!');
+        return redirect()->route('admin.savings.index')->with('success', 'Savings account updated successfully!');
     }
 
     public function destroy(SavingsAccount $savingsAccount)
     {
         $savingsAccount->delete();
-        return redirect()->route('admin.savings')->with('success', 'Savings account deleted successfully!');
+        return redirect()->route('admin.savings.index')->with('success', 'Savings account deleted successfully!');
     }
 
     public function deposit(Request $request, SavingsAccount $savingsAccount)
@@ -90,13 +106,23 @@ class SavingsController extends Controller
             'description' => 'nullable|string|max:255',
         ]);
 
-        $savingsAccount->increment('balance', $request->amount);
+        $previousBalance = $savingsAccount->balance;
+        $newBalance = $previousBalance + $request->amount;
+        
+        $savingsAccount->update(['balance' => $newBalance]);
 
         Transaction::create([
-            'savings_account_id' => $savingsAccount->id,
-            'type' => 'deposit',
+            'transaction_number' => $this->generateTransactionNumber(),
+            'member_id' => $savingsAccount->member_id,
+            'branch_id' => Auth::check() ? Auth::user()->branch_id : null,
+            'transaction_type' => 'deposit',
             'amount' => $request->amount,
-            'description' => $request->description ?? 'Deposit to savings account',
+            'balance_before' => $previousBalance,
+            'balance_after' => $newBalance,
+            'reference_type' => 'savings_account',
+            'reference_id' => $savingsAccount->id,
+            'description' => $request->description ?? "Deposit to account #{$savingsAccount->account_number}",
+            'processed_by' => Auth::check() ? Auth::user()->id : null,
             'transaction_date' => now(),
         ]);
 
@@ -110,16 +136,40 @@ class SavingsController extends Controller
             'description' => 'nullable|string|max:255',
         ]);
 
-        $savingsAccount->decrement('balance', $request->amount);
+        $previousBalance = $savingsAccount->balance;
+        $newBalance = $previousBalance - $request->amount;
+        
+        $savingsAccount->update(['balance' => $newBalance]);
 
         Transaction::create([
-            'savings_account_id' => $savingsAccount->id,
-            'type' => 'withdrawal',
+            'transaction_number' => $this->generateTransactionNumber(),
+            'member_id' => $savingsAccount->member_id,
+            'branch_id' => Auth::check() ? Auth::user()->branch_id : null,
+            'transaction_type' => 'withdrawal',
             'amount' => $request->amount,
-            'description' => $request->description ?? 'Withdrawal from savings account',
+            'balance_before' => $previousBalance,
+            'balance_after' => $newBalance,
+            'reference_type' => 'savings_account',
+            'reference_id' => $savingsAccount->id,
+            'description' => $request->description ?? "Withdrawal from account #{$savingsAccount->account_number}",
+            'processed_by' => Auth::check() ? Auth::user()->id : null,
             'transaction_date' => now(),
         ]);
 
         return redirect()->back()->with('success', 'Withdrawal processed successfully!');
+    }
+    
+    private function generateAccountNumber()
+    {
+        $lastAccount = SavingsAccount::orderBy('id', 'desc')->first();
+        $nextNumber = $lastAccount ? intval(substr($lastAccount->account_number, -8)) + 1 : 1;
+        return 'SA' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+    }
+    
+    private function generateTransactionNumber()
+    {
+        $lastTransaction = Transaction::orderBy('id', 'desc')->first();
+        $nextNumber = $lastTransaction ? intval(substr($lastTransaction->transaction_number, -8)) + 1 : 1;
+        return 'TXN' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
     }
 }

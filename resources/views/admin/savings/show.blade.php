@@ -156,7 +156,7 @@
                     <i class="fas fa-arrow-up text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <h3 class="text-lg font-semibold text-gray-900">{{ $savingsAccount->transactions->where('type', 'deposit')->count() }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ $savingsAccount->transactions->where('transaction_type', 'deposit')->count() }}</h3>
                     <p class="text-gray-600">Total Deposits</p>
                 </div>
             </div>
@@ -168,7 +168,7 @@
                     <i class="fas fa-arrow-down text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <h3 class="text-lg font-semibold text-gray-900">{{ $savingsAccount->transactions->where('type', 'withdrawal')->count() }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ $savingsAccount->transactions->where('transaction_type', 'withdrawal')->count() }}</h3>
                     <p class="text-gray-600">Total Withdrawals</p>
                 </div>
             </div>
@@ -180,7 +180,7 @@
                     <i class="fas fa-plus text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <h3 class="text-lg font-semibold text-gray-900">रू {{ number_format($savingsAccount->transactions->where('type', 'deposit')->sum('amount'), 2) }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">रू {{ number_format($savingsAccount->transactions->where('transaction_type', 'deposit')->sum('amount'), 2) }}</h3>
                     <p class="text-gray-600">Total Deposited</p>
                 </div>
             </div>
@@ -192,7 +192,7 @@
                     <i class="fas fa-minus text-xl"></i>
                 </div>
                 <div class="ml-4">
-                    <h3 class="text-lg font-semibold text-gray-900">रू {{ number_format($savingsAccount->transactions->where('type', 'withdrawal')->sum('amount'), 2) }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">रू {{ number_format($savingsAccount->transactions->where('transaction_type', 'withdrawal')->sum('amount'), 2) }}</h3>
                     <p class="text-gray-600">Total Withdrawn</p>
                 </div>
             </div>
@@ -224,12 +224,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($transaction->type === 'deposit') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
-                                {{ ucfirst($transaction->type) }}
+                                @if($transaction->transaction_type === 'deposit') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
+                                {{ ucfirst($transaction->transaction_type) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $transaction->type === 'deposit' ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $transaction->type === 'deposit' ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $transaction->transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $transaction->transaction_type === 'deposit' ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $transaction->description ?: 'No description' }}

@@ -103,7 +103,7 @@ class User extends Authenticatable
     // Methods
     public function isSuperAdmin(): bool
     {
-        return $this->role()->exists() && $this->role->slug === 'super-admin';
+        return $this->role()->exists() && $this->role && $this->role->slug === 'super-admin';
     }
     
     public function hasPermission($permission): bool
@@ -112,10 +112,22 @@ class User extends Authenticatable
             return true;
         }
         
-        return $this->role()->exists() && $this->role->hasPermission($permission);
+        // Ensure the role relationship is loaded
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+        
+        return $this->role && $this->role->hasPermission($permission);
     }
     
-    public function can($abilities, $arguments = [])
+    /**
+     * Check if the user has the given ability/permission
+     * 
+     * @param string|array $abilities
+     * @param array $arguments
+     * @return bool
+     */
+    public function can($abilities, $arguments = []): bool
     {
         // If $abilities is an array/iterable, check if user has any of the abilities
         if (is_iterable($abilities)) {
@@ -133,21 +145,21 @@ class User extends Authenticatable
 
     public function isBranchManager(): bool
     {
-        return $this->role()->exists() && $this->role->slug === 'branch-manager';
+        return $this->role()->exists() && $this->role && $this->role->slug === 'branch-manager';
     }
 
     public function isFieldOfficer(): bool
     {
-        return $this->role()->exists() && $this->role->slug === 'field-officer';
+        return $this->role()->exists() && $this->role && $this->role->slug === 'field-officer';
     }
 
     public function isAccountant(): bool
     {
-        return $this->role()->exists() && $this->role->slug === 'accountant';
+        return $this->role()->exists() && $this->role && $this->role->slug === 'accountant';
     }
 
     public function isMember(): bool
     {
-        return $this->role()->exists() && $this->role->slug === 'member';
+        return $this->role()->exists() && $this->role && $this->role->slug === 'member';
     }
 }

@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Member Selection -->
                 <div>
-                    <x-required-label for="member_id" value="Member" />
+                    <label for="member_id" class="block text-sm font-medium text-gray-700">Member</label>
                     <select name="member_id" id="member_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Member</option>
@@ -28,7 +28,7 @@
 
                 <!-- Loan Type -->
                 <div>
-                    <x-required-label for="loan_type_id" value="Loan Type" />
+                    <label for="loan_type_id" class="block text-sm font-medium text-gray-700">Loan Type</label>
                     <select name="loan_type_id" id="loan_type_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Loan Type</option>
@@ -45,7 +45,7 @@
 
                 <!-- Loan Amount -->
                 <div>
-                    <x-required-label for="amount" value="Loan Amount (रू)" />
+                    <label for="amount" class="block text-sm font-medium text-gray-700">Loan Amount (रू)</label>
                     <input type="number" name="amount" id="amount" value="{{ old('amount') }}" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('amount')
@@ -55,7 +55,7 @@
 
                 <!-- Interest Rate -->
                 <div>
-                    <x-required-label for="interest_rate" value="Interest Rate (%)" />
+                    <label for="interest_rate" class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
                     <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" step="0.01" min="0" max="100" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('interest_rate')
@@ -65,7 +65,7 @@
 
                 <!-- Loan Term -->
                 <div>
-                    <x-required-label for="term_months" value="Loan Term (Months)" />
+                    <label for="term_months" class="block text-sm font-medium text-gray-700">Loan Term (Months)</label>
                     <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" min="1" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('term_months')
@@ -75,7 +75,7 @@
 
                 <!-- Purpose -->
                 <div>
-                    <x-label for="purpose" value="Loan Purpose" />
+                    <label for="purpose" class="block text-sm font-medium text-gray-700">Loan Purpose</label>
                     <textarea name="purpose" id="purpose" rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('purpose') }}</textarea>
                     @error('purpose')
@@ -85,7 +85,7 @@
 
                 <!-- Status -->
                 <div>
-                    <x-required-label for="status" value="Status" />
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                     <select name="status" id="status" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>

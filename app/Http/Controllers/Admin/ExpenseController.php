@@ -6,18 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view-expenses')->only(['index', 'show']);
-        $this->middleware('permission:create-expenses')->only(['create', 'store']);
-        $this->middleware('permission:edit-expenses')->only(['edit', 'update']);
-        $this->middleware('permission:delete-expenses')->only(['destroy']);
-    }
-    
     public function index()
     {
         $expenses = Expense::with(['branch'])->orderBy('created_at', 'desc')->paginate(15);
@@ -43,7 +35,14 @@ class ExpenseController extends Controller
             'vendor_name' => 'nullable|string|max:255',
         ]);
 
-        Expense::create($request->all());
+        $data = $request->all();
+        if (Auth::check()) {
+            $data['requested_by'] = Auth::user()->id;
+        } else {
+            $data['requested_by'] = null;
+        }
+        
+        Expense::create($data);
 
         return redirect()->route('admin.expenses.index')->with('success', 'Expense recorded successfully!');
     }

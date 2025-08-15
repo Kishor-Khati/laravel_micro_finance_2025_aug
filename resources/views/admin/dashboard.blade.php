@@ -60,6 +60,68 @@
         </div>
     </div>
 
+    <!-- Financial Summary -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Raw Income -->
+            <div class="bg-blue-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-blue-700">Raw Income</p>
+                        <p class="text-xl font-bold text-blue-900">रू {{ number_format($stats['total_raw_income'] ?? 0, 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-hand-holding-usd text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-blue-700 mt-2">Total loan interest earned</p>
+            </div>
+            
+            <!-- Share Bonuses -->
+            <div class="bg-green-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-green-700">Share Bonuses</p>
+                        <p class="text-xl font-bold text-green-900">रू {{ number_format($stats['total_share_bonus'] ?? 0, 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-green-700 mt-2">Distributed to {{ $stats['members_with_savings']->count() }} members</p>
+            </div>
+            
+            <!-- Expenses -->
+            <div class="bg-red-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-red-700">Expenses</p>
+                        <p class="text-xl font-bold text-red-900">रू {{ number_format($stats['total_expenses'] ?? 0, 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-red-100 text-red-600">
+                        <i class="fas fa-file-invoice-dollar text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-red-700 mt-2">Total approved expenses</p>
+            </div>
+            
+            <!-- Final Balance -->
+            <div class="bg-purple-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-purple-700">Net Income</p>
+                        <p class="text-xl font-bold text-purple-900">रू {{ number_format($stats['final_balance'] ?? 0, 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-purple-700 mt-2">Raw Income - Share Bonuses - Expenses</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts and Recent Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Monthly Overview -->

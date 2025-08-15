@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class SavingsAccount extends Model
 {
@@ -44,10 +45,9 @@ class SavingsAccount extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function transactions(): HasMany
+    public function transactions(): MorphMany
     {
-        return $this->hasMany(Transaction::class, 'reference_id')
-                    ->where('reference_type', 'savings_account');
+        return $this->morphMany(Transaction::class, 'reference');
     }
 
     // Scopes

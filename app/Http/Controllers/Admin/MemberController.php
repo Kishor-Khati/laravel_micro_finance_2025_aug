@@ -9,15 +9,6 @@ use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view-members')->only(['index', 'show']);
-        $this->middleware('permission:create-members')->only(['create', 'store']);
-        $this->middleware('permission:edit-members')->only(['edit', 'update']);
-        $this->middleware('permission:delete-members')->only(['destroy']);
-    }
-    
     public function index()
     {
         $members = Member::with('branch')->paginate(15);
@@ -51,9 +42,12 @@ class MemberController extends Controller
             'emergency_contact_phone' => 'nullable|string|max:20',
         ]);
 
-        Member::create($request->all());
-
-        return redirect()->route('admin.members')->with('success', 'Member created successfully!');
+        try {
+            Member::create($request->all());
+            return redirect()->route('admin.members.index')->with('success', 'Member created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to create member: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function show(Member $member)
@@ -89,14 +83,21 @@ class MemberController extends Controller
             'emergency_contact_phone' => 'nullable|string|max:20',
         ]);
 
-        $member->update($request->all());
-
-        return redirect()->route('admin.members')->with('success', 'Member updated successfully!');
+        try {
+            $member->update($request->all());
+            return redirect()->route('admin.members.index')->with('success', 'Member updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update member: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function destroy(Member $member)
     {
-        $member->delete();
-        return redirect()->route('admin.members')->with('success', 'Member deleted successfully!');
+        try {
+            $member->delete();
+            return redirect()->route('admin.members.index')->with('success', 'Member deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete member: ' . $e->getMessage());
+        }
     }
 }

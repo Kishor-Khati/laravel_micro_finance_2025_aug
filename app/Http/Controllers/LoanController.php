@@ -15,22 +15,13 @@ use Carbon\Carbon;
 
 class LoanController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view-loans')->only(['index', 'show']);
-        $this->middleware('permission:create-loans')->only(['create', 'store']);
-        $this->middleware('permission:approve-loans')->only(['approve']);
-        $this->middleware('permission:manage-loans')->only(['disburse', 'reject', 'close']);
-    }
-    
     public function index(Request $request)
     {
         $query = Loan::with(['member', 'loanType', 'branch'])
             ->orderBy('created_at', 'desc');
             
-        // Apply branch filter for users without all-branches permission
-        if (!Auth::user()->hasPermission('view-all-branches')) {
+        // Apply branch filter for non-super-admin users
+        if (!Auth::user()->isSuperAdmin()) {
             $query->where('branch_id', Auth::user()->branch_id);
         }
         

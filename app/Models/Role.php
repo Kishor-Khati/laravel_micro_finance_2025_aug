@@ -36,6 +36,13 @@ class Role extends Model
     // Methods
     public function hasPermission($permission): bool
     {
-        return in_array($permission, $this->permissions ?? []);
+        if (!$this->permissions) {
+            return false;
+        }
+        
+        // Ensure permissions is an array
+        $permissions = is_array($this->permissions) ? $this->permissions : json_decode($this->permissions, true);
+        
+        return in_array($permission, $permissions ?? []);
     }
 }

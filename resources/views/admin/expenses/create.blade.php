@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Expense Category -->
                 <div>
-                    <x-required-label for="category" value="Expense Category" />
+                    <label for="category" class="block text-sm font-medium text-gray-700">Expense Category</label>
                     <select name="category" id="category" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Category</option>
@@ -34,7 +34,7 @@
 
                 <!-- Description -->
                 <div>
-                    <x-required-label for="description" value="Description" />
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                     <textarea name="description" id="description" rows="3" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
                     <p class="mt-1 text-sm text-gray-500">Provide detailed description of the expense</p>
@@ -46,7 +46,7 @@
                 <!-- Amount and Date -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <x-required-label for="amount" value="Amount (रू)" />
+                        <label for="amount" class="block text-sm font-medium text-gray-700">Amount (रू)</label>
                         <input type="number" name="amount" id="amount" value="{{ old('amount') }}" step="0.01" min="0" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('amount')
@@ -55,7 +55,7 @@
                     </div>
 
                     <div>
-                        <x-required-label for="expense_date" value="Expense Date" />
+                        <label for="expense_date" class="block text-sm font-medium text-gray-700">Expense Date</label>
                         <input type="date" name="expense_date" id="expense_date" value="{{ old('expense_date', date('Y-m-d')) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('expense_date')
@@ -67,7 +67,7 @@
                 <!-- Branch and Payment Method -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <x-required-label for="branch_id" value="Branch" />
+                        <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
                         <select name="branch_id" id="branch_id" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">Select Branch</option>
@@ -83,7 +83,7 @@
                     </div>
 
                     <div>
-                        <x-required-label for="payment_method" value="Payment Method" />
+                        <label for="payment_method" class="block text-sm font-medium text-gray-700">Payment Method</label>
                         <select name="payment_method" id="payment_method" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">Select Payment Method</option>
@@ -101,7 +101,7 @@
                 <!-- Receipt Number and Vendor Name -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <x-label for="receipt_number" value="Receipt Number" />
+                        <label for="receipt_number" class="block text-sm font-medium text-gray-700">Receipt Number</label>
                         <input type="text" name="receipt_number" id="receipt_number" value="{{ old('receipt_number') }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <p class="mt-1 text-sm text-gray-500">Optional receipt or invoice number</p>
@@ -111,7 +111,7 @@
                     </div>
 
                     <div>
-                        <x-label for="vendor_name" value="Vendor Name" />
+                        <label for="vendor_name" class="block text-sm font-medium text-gray-700">Vendor Name</label>
                         <input type="text" name="vendor_name" id="vendor_name" value="{{ old('vendor_name') }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <p class="mt-1 text-sm text-gray-500">Optional vendor or supplier name</p>

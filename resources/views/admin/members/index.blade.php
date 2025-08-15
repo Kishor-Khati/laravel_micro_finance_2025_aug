@@ -59,11 +59,10 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <a href="{{ route('admin.members.show', $member) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
                         <a href="{{ route('admin.members.edit', $member) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                        <form method="POST" action="{{ route('admin.members.destroy', $member) }}" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
+                        <a href="#" 
+                           class="delete-button text-red-600 hover:text-red-900" 
+                           data-url="{{ route('admin.members.destroy', $member) }}" 
+                           data-name="{{ $member->first_name }} {{ $member->last_name }}">Delete</a>
                     </td>
                 </tr>
                 @endforeach

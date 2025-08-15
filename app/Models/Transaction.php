@@ -16,6 +16,7 @@ class Transaction extends Model
         'branch_id',
         'transaction_type',
         'amount',
+        'interest_amount',
         'balance_before',
         'balance_after',
         'reference_type',
@@ -27,6 +28,7 @@ class Transaction extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'interest_amount' => 'decimal:2',
         'balance_before' => 'decimal:2',
         'balance_after' => 'decimal:2',
         'transaction_date' => 'date',

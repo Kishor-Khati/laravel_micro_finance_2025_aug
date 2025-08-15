@@ -16,6 +16,12 @@ class UserSeeder extends Seeder
         $branchManagerRole = Role::where('slug', 'branch-manager')->first();
         $fieldOfficerRole = Role::where('slug', 'field-officer')->first();
         $accountantRole = Role::where('slug', 'accountant')->first();
+        $memberRole = Role::where('slug', 'member')->first();
+        
+        if (!$superAdminRole || !$branchManagerRole || !$fieldOfficerRole || !$accountantRole || !$memberRole) {
+            $this->command->info('Please run the RoleSeeder first!');
+            return;
+        }
         
         $users = [
             [

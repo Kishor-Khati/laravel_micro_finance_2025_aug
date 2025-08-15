@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Branch Name -->
                 <div>
-                    <x-required-label for="name" value="Branch Name" />
+                    <label for="name" class="block text-sm font-medium text-gray-700">Branch Name</label>
                     <input type="text" name="name" id="name" value="{{ old('name') }}" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('name')
@@ -21,7 +21,7 @@
 
                 <!-- Branch Code -->
                 <div>
-                    <x-required-label for="code" value="Branch Code" />
+                    <label for="code" class="block text-sm font-medium text-gray-700">Branch Code</label>
                     <input type="text" name="code" id="code" value="{{ old('code') }}" required maxlength="10"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <p class="mt-1 text-sm text-gray-500">Unique branch identifier (max 10 characters)</p>
@@ -32,7 +32,7 @@
 
                 <!-- Address -->
                 <div>
-                    <x-required-label for="address" value="Address" />
+                    <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
                     <textarea name="address" id="address" rows="3" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('address') }}</textarea>
                     @error('address')
@@ -42,7 +42,7 @@
 
                 <!-- Phone -->
                 <div>
-                    <x-label for="phone" value="Phone Number" />
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
                     <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('phone')
@@ -52,7 +52,7 @@
 
                 <!-- Email -->
                 <div>
-                    <x-label for="email" value="Email Address" />
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
                     <input type="email" name="email" id="email" value="{{ old('email') }}"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('email')
@@ -62,7 +62,7 @@
 
                 <!-- Manager Name -->
                 <div>
-                    <x-label for="manager_name" value="Manager Name" />
+                    <label for="manager_name" class="block text-sm font-medium text-gray-700">Manager Name</label>
                     <input type="text" name="manager_name" id="manager_name" value="{{ old('manager_name') }}"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('manager_name')

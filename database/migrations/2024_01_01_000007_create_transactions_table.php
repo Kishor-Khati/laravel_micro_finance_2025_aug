@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('branch_id')->constrained()->onDelete('cascade');
             $table->enum('transaction_type', ['deposit', 'withdrawal', 'loan_disbursement', 'loan_payment', 'interest_earned', 'fee_charge']);
             $table->decimal('amount', 15, 2);
+            $table->decimal('interest_amount', 15, 2)->nullable(); // For loan payments, to track interest portion
             $table->decimal('balance_before', 15, 2);
             $table->decimal('balance_after', 15, 2);
             $table->string('reference_type')->nullable(); // loan, savings_account

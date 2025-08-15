@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -17,75 +17,65 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'slug' => 'super-admin',
-                'description' => 'Has access to everything in the system',
                 'permissions' => [
-                    'all',
+                    'manage_users',
+                    'manage_roles',
+                    'manage_branches',
+                    'manage_members',
+                    'manage_loans',
+                    'manage_savings',
+                    'manage_transactions',
+                    'manage_expenses',
+                    'view_reports',
                 ],
-                'status' => 'active',
             ],
             [
                 'name' => 'Branch Manager',
                 'slug' => 'branch-manager',
-                'description' => 'Manages a specific branch',
                 'permissions' => [
-                    'view-dashboard',
-                    'manage-members',
-                    'manage-loans',
-                    'manage-savings',
-                    'manage-transactions',
-                    'view-reports',
-                    'approve-loans',
+                    'manage_members',
+                    'manage_loans',
+                    'manage_savings',
+                    'manage_transactions',
+                    'manage_expenses',
+                    'view_reports',
                 ],
-                'status' => 'active',
             ],
             [
                 'name' => 'Field Officer',
                 'slug' => 'field-officer',
-                'description' => 'Handles field operations',
                 'permissions' => [
-                    'view-dashboard',
-                    'view-members',
-                    'create-members',
-                    'view-loans',
-                    'create-loans',
-                    'view-savings',
-                    'create-savings',
-                    'view-transactions',
-                    'create-transactions',
+                    'manage_members',
+                    'manage_loans',
+                    'manage_savings',
+                    'manage_transactions',
                 ],
-                'status' => 'active',
             ],
             [
                 'name' => 'Accountant',
                 'slug' => 'accountant',
-                'description' => 'Manages financial records',
                 'permissions' => [
-                    'view-dashboard',
-                    'view-members',
-                    'view-loans',
-                    'view-savings',
-                    'manage-transactions',
-                    'manage-expenses',
-                    'view-reports',
+                    'manage_transactions',
+                    'manage_expenses',
+                    'view_reports',
                 ],
-                'status' => 'active',
             ],
             [
                 'name' => 'Member',
                 'slug' => 'member',
-                'description' => 'Regular member of the microfinance',
                 'permissions' => [
-                    'view-own-profile',
-                    'view-own-loans',
-                    'view-own-savings',
-                    'view-own-transactions',
+                    'view_own_loans',
+                    'view_own_savings',
+                    'view_own_transactions',
                 ],
-                'status' => 'active',
             ],
         ];
 
         foreach ($roles as $role) {
-            Role::create($role);
+            Role::updateOrCreate(
+                ['slug' => $role['slug']],
+                $role
+            );
         }
     }
 }

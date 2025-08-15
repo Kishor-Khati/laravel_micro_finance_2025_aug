@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SavingsController as AdminSavingsController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ReportsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,7 +34,28 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     
-    // Users Management
+    // Form Components Demo
+    Route::match(['get', 'post'], '/form-demo', [AdminController::class, 'formDemo'])->name('form-demo');
+    Route::get('/form-documentation', [AdminController::class, 'formDocumentation'])->name('form-documentation');
+     Route::get('/sweet-alert-demo', [AdminController::class, 'sweetAlertDemo'])->name('sweet-alert-demo');
+     Route::get('/sweet-alert-documentation', [AdminController::class, 'sweetAlertDocumentation'])->name('sweet-alert-documentation');
+    
+    // Reports
+Route::get('/reports', [ReportsController::class, 'index'])->name('reports');
+Route::get('/reports/members/excel', [ReportsController::class, 'exportMembersExcel'])->name('reports.members.excel');
+Route::get('/reports/members/pdf', [ReportsController::class, 'exportMembersPdf'])->name('reports.members.pdf');
+Route::get('/reports/loans/excel', [ReportsController::class, 'exportLoansExcel'])->name('reports.loans.excel');
+Route::get('/reports/loans/pdf', [ReportsController::class, 'exportLoansPdf'])->name('reports.loans.pdf');
+Route::get('/reports/savings/excel', [ReportsController::class, 'exportSavingsExcel'])->name('reports.savings.excel');
+Route::get('/reports/savings/pdf', [ReportsController::class, 'exportSavingsPdf'])->name('reports.savings.pdf');
+Route::get('/reports/transactions/excel', [ReportsController::class, 'exportTransactionsExcel'])->name('reports.transactions.excel');
+Route::get('/reports/transactions/pdf', [ReportsController::class, 'exportTransactionsPdf'])->name('reports.transactions.pdf');
+Route::get('/reports/branches/excel', [ReportsController::class, 'exportBranchesExcel'])->name('reports.branches.excel');
+Route::get('/reports/branches/pdf', [ReportsController::class, 'exportBranchesPdf'])->name('reports.branches.pdf');
+Route::get('/reports/summary/excel', [ReportsController::class, 'exportSummaryExcel'])->name('reports.summary.excel');
+Route::get('/reports/summary/pdf', [ReportsController::class, 'exportSummaryPdf'])->name('reports.summary.pdf');
+
+// Users Management
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
@@ -62,7 +84,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('expenses', ExpenseController::class);
     
     // Reports
-    Route::prefix('reports')->name('reports.')->group(function () {
+Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/financial', [ReportController::class, 'financial'])->name('financial');
         Route::get('/members', [ReportController::class, 'members'])->name('members');
@@ -70,6 +92,23 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/branches', [ReportController::class, 'branches'])->name('branches');
         Route::get('/transactions', [ReportController::class, 'transactions'])->name('transactions');
         Route::get('/summary', [ReportController::class, 'summary'])->name('summary');
+        Route::get('/documentation', [ReportController::class, 'documentation'])->name('documentation');
+    });
+    
+    // Finance Statements with Share Bonus Calculations
+    Route::prefix('finance-statements')->name('finance-statements.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\FinanceStatementController::class, 'index'])->name('index');
+        Route::post('/generate', [\App\Http\Controllers\Admin\FinanceStatementController::class, 'generate'])->name('generate');
+        Route::get('/export-pdf', [\App\Http\Controllers\Admin\FinanceStatementController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export-excel', [\App\Http\Controllers\Admin\FinanceStatementController::class, 'exportExcel'])->name('export-excel');
+    });
+    
+    // Share Bonus Statements
+    Route::prefix('share-bonus')->name('share-bonus.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ShareBonusController::class, 'index'])->name('index');
+        Route::post('/generate', [\App\Http\Controllers\Admin\ShareBonusController::class, 'generate'])->name('generate');
+        Route::get('/export-pdf', [\App\Http\Controllers\Admin\ShareBonusController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export-excel', [\App\Http\Controllers\Admin\ShareBonusController::class, 'exportExcel'])->name('export-excel');
     });
 });
 

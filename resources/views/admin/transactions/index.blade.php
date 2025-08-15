@@ -35,21 +35,27 @@
                         <div class="text-sm text-gray-500">{{ $transaction->transaction_date->format('g:i A') }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">{{ $transaction->savingsAccount->account_number }}</div>
+                        <div class="text-sm text-gray-900">
+                            @if($transaction->reference_type == 'App\Models\SavingsAccount')
+                                {{ $transaction->reference->account_number }}
+                            @else
+                                {{ $transaction->reference_type }}
+                            @endif
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">{{ $transaction->savingsAccount->member->first_name }} {{ $transaction->savingsAccount->member->last_name }}</div>
-                        <div class="text-sm text-gray-500">ID: {{ $transaction->savingsAccount->member->member_id }}</div>
+                        <div class="text-sm font-medium text-gray-900">{{ $transaction->member->first_name }} {{ $transaction->member->last_name }}</div>
+                        <div class="text-sm text-gray-500">ID: {{ $transaction->member->member_id }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            @if($transaction->type === 'deposit') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
-                            {{ ucfirst($transaction->type) }}
+                            @if($transaction->transaction_type === 'deposit') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
+                            {{ ucfirst($transaction->transaction_type) }}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium {{ $transaction->type === 'deposit' ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $transaction->type === 'deposit' ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
+                        <div class="text-sm font-medium {{ $transaction->transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $transaction->transaction_type === 'deposit' ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -5,6 +5,11 @@
 
 @section('content')
 <div class="space-y-6">
+    <div class="flex justify-end mb-4">
+        <a href="{{ route('admin.reports.documentation') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+            <i class="fas fa-book mr-2"></i> View Documentation
+        </a>
+    </div>
     <!-- Report Categories -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Financial Reports -->
@@ -29,9 +34,15 @@
                     → Cash Flow Analysis
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.financial') }}" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Financial Reports
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.financial') }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.transactions.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.transactions.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>
@@ -58,9 +69,15 @@
                     → Member Activity Analysis
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.members') }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Member Reports
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.members') }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.members.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.members.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>
@@ -87,9 +104,15 @@
                     → Default Risk Analysis
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.loans') }}" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Loan Reports
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.loans') }}" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.loans.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.loans.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>
@@ -116,9 +139,15 @@
                     → Staff Productivity
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.branches') }}" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Branch Reports
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.branches') }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.branches.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.branches.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>
@@ -145,9 +174,15 @@
                     → Volume Analysis
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.transactions') }}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Transaction Reports
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.transactions') }}" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.transactions.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.transactions.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>
@@ -174,9 +209,15 @@
                     → Growth Metrics
                 </a>
             </div>
-            <div class="mt-4">
-                <a href="{{ route('admin.reports.summary') }}" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg inline-block text-center">
-                    View Executive Summary
+            <div class="mt-4 flex space-x-2">
+                <a href="{{ route('admin.reports.summary') }}" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg inline-block text-center">
+                    View Reports
+                </a>
+                <a href="{{ route('reports.summary.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-excel"></i>
+                </a>
+                <a href="{{ route('reports.summary.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
         </div>

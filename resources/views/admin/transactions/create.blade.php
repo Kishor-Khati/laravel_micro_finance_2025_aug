@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Savings Account -->
                 <div>
-                    <x-required-label for="savings_account_id" value="Savings Account" />
+                    <label for="savings_account_id" class="block text-sm font-medium text-gray-700">Savings Account</label>
                     <select name="savings_account_id" id="savings_account_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Account</option>
@@ -28,21 +28,21 @@
 
                 <!-- Transaction Type -->
                 <div>
-                    <x-required-label for="type" value="Transaction Type" />
-                    <select name="type" id="type" required
+                    <label for="transaction_type" class="block text-sm font-medium text-gray-700">Transaction Type</label>
+                    <select name="transaction_type" id="transaction_type" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Type</option>
-                        <option value="deposit" {{ old('type') == 'deposit' ? 'selected' : '' }}>Deposit</option>
-                        <option value="withdrawal" {{ old('type') == 'withdrawal' ? 'selected' : '' }}>Withdrawal</option>
+                        <option value="deposit" {{ old('transaction_type') == 'deposit' ? 'selected' : '' }}>Deposit</option>
+                        <option value="withdrawal" {{ old('transaction_type') == 'withdrawal' ? 'selected' : '' }}>Withdrawal</option>
                     </select>
-                    @error('type')
+                    @error('transaction_type')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- Amount -->
                 <div>
-                    <x-required-label for="amount" value="Amount (रू)" />
+                    <label for="amount" class="block text-sm font-medium text-gray-700">Amount (रू)</label>
                     <input type="number" name="amount" id="amount" value="{{ old('amount') }}" step="0.01" min="0.01" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('amount')
@@ -52,7 +52,7 @@
 
                 <!-- Description -->
                 <div>
-                    <x-label for="description" value="Description (Optional)" />
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
                     <textarea name="description" id="description" rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
                     @error('description')

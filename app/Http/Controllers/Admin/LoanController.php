@@ -8,18 +8,10 @@ use App\Models\Member;
 use App\Models\LoanType;
 use App\Models\LoanInstallment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoanController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('permission:view-loans')->only(['index', 'show']);
-        $this->middleware('permission:create-loans')->only(['create', 'store']);
-        $this->middleware('permission:approve-loans')->only(['approve']);
-        $this->middleware('permission:manage-loans')->only(['disburse', 'reject', 'close']);
-    }
-    
     public function index()
     {
         $loans = Loan::with(['member', 'loanType'])->paginate(15);
@@ -45,7 +37,14 @@ class LoanController extends Controller
             'status' => 'required|in:pending,approved,active,closed,defaulted',
         ]);
 
-        $loan = Loan::create($request->all());
+        $data = $request->all();
+        if (Auth::check()) {
+            $data['approved_by'] = Auth::user()->id;
+        } else {
+            $data['approved_by'] = null;
+        }
+        
+        $loan = Loan::create($data);
 
         // Create installments if loan is approved
         if ($request->status === 'approved' || $request->status === 'active') {
@@ -80,7 +79,18 @@ class LoanController extends Controller
             'status' => 'required|in:pending,approved,active,closed,defaulted',
         ]);
 
-        $loan->update($request->all());
+        $data = $request->all();
+        
+        // Only update approved_by if status is changing to approved
+        if ($request->status === 'approved' && $loan->status !== 'approved') {
+            if (Auth::check()) {
+                $data['approved_by'] = Auth::user()->id;
+            } else {
+                $data['approved_by'] = null;
+            }
+        }
+        
+        $loan->update($data);
 
         return redirect()->route('admin.loans')->with('success', 'Loan updated successfully!');
     }

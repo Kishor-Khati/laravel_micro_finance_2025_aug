@@ -15,15 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->text('permissions')->nullable();
             $table->timestamps();
-        });
-        
-        // Add role_id to users table
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->after('role')->constrained()->onDelete('set null');
         });
     }
 
@@ -32,11 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id']);
-            $table->dropColumn('role_id');
-        });
-        
         Schema::dropIfExists('roles');
     }
 };

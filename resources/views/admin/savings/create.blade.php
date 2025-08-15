@@ -11,7 +11,7 @@
             <div class="space-y-6">
                 <!-- Member Selection -->
                 <div>
-                    <x-required-label for="member_id" value="Member" />
+                    <label for="member_id" class="block text-sm font-medium text-gray-700">Member</label>
                     <select name="member_id" id="member_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Member</option>
@@ -28,7 +28,7 @@
 
                 <!-- Savings Type -->
                 <div>
-                    <x-required-label for="savings_type_id" value="Savings Type" />
+                    <label for="savings_type_id" class="block text-sm font-medium text-gray-700">Savings Type</label>
                     <select name="savings_type_id" id="savings_type_id" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="">Select Savings Type</option>
@@ -43,20 +43,18 @@
                     @enderror
                 </div>
 
-                <!-- Account Number -->
+                <!-- Account Number is now auto-generated -->
                 <div>
-                    <x-required-label for="account_number" value="Account Number" />
-                    <input type="text" name="account_number" id="account_number" value="{{ old('account_number') }}" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <p class="mt-1 text-sm text-gray-500">Unique account identifier</p>
-                    @error('account_number')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="block text-sm font-medium text-gray-700">Account Number</label>
+                    <div class="mt-1 block w-full py-2 px-3 bg-gray-100 rounded-md border border-gray-200">
+                        <span class="text-gray-600">Will be automatically generated</span>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">A unique account number will be assigned upon creation</p>
                 </div>
 
                 <!-- Initial Balance -->
                 <div>
-                    <x-required-label for="balance" value="Initial Balance (रू)" />
+                    <label for="balance" class="block text-sm font-medium text-gray-700">Initial Balance (रू)</label>
                     <input type="number" name="balance" id="balance" value="{{ old('balance', '0') }}" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     @error('balance')
@@ -64,19 +62,18 @@
                     @enderror
                 </div>
 
-                <!-- Interest Rate -->
+                <!-- Interest Rate is now derived from savings type -->
                 <div>
-                    <x-required-label for="interest_rate" value="Interest Rate (%)" />
-                    <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate') }}" step="0.01" min="0" max="100" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    @error('interest_rate')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                    <label class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
+                    <div class="mt-1 block w-full py-2 px-3 bg-gray-100 rounded-md border border-gray-200">
+                        <span class="text-gray-600" id="interest_rate_display">Will be set based on savings type</span>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Interest rate is determined by the selected savings type</p>
                 </div>
 
                 <!-- Status -->
                 <div>
-                    <x-required-label for="status" value="Account Status" />
+                    <label for="status" class="block text-sm font-medium text-gray-700">Account Status</label>
                     <select name="status" id="status" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -123,33 +120,29 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-generate account number
-    const generateAccountNumber = () => {
-        const timestamp = Date.now().toString().slice(-6);
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        return 'SAV' + timestamp + random;
-    };
-    
-    const accountNumberInput = document.getElementById('account_number');
-    if (!accountNumberInput.value) {
-        accountNumberInput.value = generateAccountNumber();
-    }
-    
-    // Auto-fill interest rate based on savings type
+    // Display interest rate based on savings type
     const savingsTypeSelect = document.getElementById('savings_type_id');
-    const interestRateInput = document.getElementById('interest_rate');
+    const interestRateDisplay = document.getElementById('interest_rate_display');
     
-    savingsTypeSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
+    const updateInterestRateDisplay = () => {
+        const selectedOption = savingsTypeSelect.options[savingsTypeSelect.selectedIndex];
         if (selectedOption.value) {
             // Extract interest rate from option text
             const text = selectedOption.text;
             const match = text.match(/(\d+\.?\d*)% interest/);
             if (match) {
-                interestRateInput.value = match[1];
+                interestRateDisplay.textContent = match[1] + '%';
+            } else {
+                interestRateDisplay.textContent = 'Will be set based on savings type';
             }
+        } else {
+            interestRateDisplay.textContent = 'Will be set based on savings type';
         }
-    });
+    };
+    
+    // Update display on page load and when savings type changes
+    updateInterestRateDisplay();
+    savingsTypeSelect.addEventListener('change', updateInterestRateDisplay);
 });
 </script>
 @endsection

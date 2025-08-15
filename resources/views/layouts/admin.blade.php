@@ -11,10 +11,6 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -93,6 +89,40 @@
                     <i class="fas fa-chart-bar mr-3"></i>
                     Reports
                 </a>
+                
+                <a href="{{ route('admin.finance-statements.index') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.finance-statements*') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-file-invoice-dollar mr-3"></i>
+                    Finance Statements
+                </a>
+                
+                <a href="{{ route('admin.share-bonus.index') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.share-bonus*') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-percentage mr-3"></i>
+                    Share Bonus Statements
+                </a>
+
+                <div class="px-6 py-2 mt-6">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider">Development</p>
+                </div>
+
+                <a href="{{ route('admin.form-demo') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.form-demo') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-wpforms mr-3"></i>
+                    Form Components
+                </a>
+
+                <a href="{{ route('admin.form-documentation') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.form-documentation') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-book mr-3"></i>
+                    Form Documentation
+                </a>
+                
+                <a href="{{ route('admin.sweet-alert-demo') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.sweet-alert-demo') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-bell mr-3"></i>
+                    SweetAlert Demo
+                </a>
+                
+                <a href="{{ route('admin.sweet-alert-documentation') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.sweet-alert-documentation') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-book mr-3"></i>
+                    SweetAlert Docs
+                </a>
 
                 <div class="px-6 py-2 mt-6">
                     <p class="text-gray-400 text-xs uppercase tracking-wider">Settings</p>
@@ -134,9 +164,9 @@
                             </div>
                             
                             <div class="text-sm text-gray-500">
-                                <span class="font-medium">{{ auth()->user()->name }}</span>
+                                <span class="font-medium">{{ auth()->check() ? auth()->user()->name : 'Guest' }}</span>
                                 <span class="text-gray-400">·</span>
-                                <span class="capitalize">{{ str_replace('_', ' ', auth()->user()->role) }}</span>
+                                <span class="capitalize">{{ auth()->check() ? str_replace('_', ' ', auth()->user()->role) : 'No Role' }}</span>
                             </div>
                         </div>
                     </div>
@@ -145,7 +175,17 @@
 
             <!-- Content -->
             <main class="p-6">
-                <!-- Session messages will be handled by SweetAlert2 -->
+                @if (session('success'))
+                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline">{{ session('error') }}</span>
+                    </div>
+                @endif
 
                 @if ($errors->any())
                     <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -162,63 +202,9 @@
         </div>
     </div>
 
-    <!-- SweetAlert2 Session Messages -->
+    <!-- Language Switcher JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle success messages with SweetAlert2
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: "{{ session('success') }}",
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            @endif
-
-            // Handle error messages with SweetAlert2
-            @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: "{{ session('error') }}",
-                });
-            @endif
-
-            // Add delete confirmation for all delete forms
-            document.querySelectorAll('form[method="POST"]').forEach(form => {
-                // Check if the form is a delete form (has DELETE method)
-                const methodInput = form.querySelector('input[name="_method"][value="DELETE"]');
-                if (methodInput) {
-                    // Find the submit button in this form
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        // Remove the original onclick handler
-                        submitBtn.removeAttribute('onclick');
-                        
-                        // Add our SweetAlert confirmation
-                        submitBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            
-                            Swal.fire({
-                                title: 'Are you sure?',
-                                text: "This action cannot be undone!",
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#d33',
-                                cancelButtonColor: '#3085d6',
-                                confirmButtonText: 'Yes, delete it!'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    form.submit();
-                                }
-                            });
-                        });
-                    }
-                }
-            });
-
-            // Language selector handler
             const languageSelector = document.getElementById('languageSelector');
             
             if (languageSelector) {
@@ -251,5 +237,6 @@
             form.submit();
         }
     </script>
+    <x-sweet-alert />
 </body>
 </html>
