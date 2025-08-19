@@ -10,21 +10,48 @@ use App\Models\SavingsAccount;
 use App\Models\Transaction;
 use App\Models\Branch;
 use App\Models\Expense;
+use App\Models\LoanInstallment;
+use App\Models\ShareBonus;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
+        // Get members with savings for bonus highlighting
+        $membersWithSavings = Member::whereHas('savingsAccounts', function($q) {
+            $q->where('balance', '>', 0);
+        })->get();
+        
+        // Calculate financial metrics
+        $totalSavings = SavingsAccount::sum('balance');
+        $totalExpenses = Expense::where('status', 'approved')->sum('amount');
+        
+        // Calculate raw income and net income
+        $totalRawIncome = LoanInstallment::where('status', 'paid')->sum('interest_amount');
+        $netIncome = $totalRawIncome - $totalExpenses; // Net income = Raw income - Expenses
+        
+        // Get total share bonus from stored entries (only approved ones)
+        $totalShareBonus = ShareBonus::approved()->sum('amount');
+        
+        $availableBalance = $netIncome - $totalShareBonus; // Available balance = Net income - Share bonus
+        $finalBalance = $netIncome; // Final balance is the net income
+        
         $stats = [
             'total_users' => User::count(),
             'total_members' => Member::count(),
             'active_loans' => Loan::where('status', 'active')->count(),
-            'total_savings' => SavingsAccount::sum('balance'),
+            'total_savings' => $totalSavings,
             'total_branches' => Branch::count(),
-            'recent_transactions' => Transaction::orderBy('created_at', 'desc')->take(5)->get(),
+            'recent_transactions' => Transaction::with(['member', 'savingsAccount.member'])->orderBy('created_at', 'desc')->take(5)->get(),
             'monthly_loans' => Loan::whereMonth('created_at', date('m'))->count(),
             'monthly_savings' => SavingsAccount::whereMonth('created_at', date('m'))->sum('balance'),
+            'members_with_savings' => $membersWithSavings,
+            'total_expenses' => $totalExpenses,
+            'total_share_bonus' => $totalShareBonus,
+            'final_balance' => $finalBalance,
+            'available_balance' => $availableBalance,
+            'total_raw_income' => $totalRawIncome
         ];
 
         return view('admin.dashboard', compact('stats'));
@@ -133,5 +160,10 @@ class AdminController extends Controller
     {
         $user->delete();
         return redirect()->route('admin.users')->with('success', 'User deleted successfully!');
+    }
+
+    public function calendar()
+    {
+        return view('admin.calendar');
     }
 }

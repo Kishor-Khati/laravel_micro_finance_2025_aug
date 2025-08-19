@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\SavingsAccount;
 
 class Transaction extends Model
 {
@@ -53,6 +54,11 @@ class Transaction extends Model
     public function reference()
     {
         return $this->morphTo();
+    }
+
+    public function savingsAccount(): BelongsTo
+    {
+        return $this->belongsTo(SavingsAccount::class, 'reference_id');
     }
 
     // Scopes

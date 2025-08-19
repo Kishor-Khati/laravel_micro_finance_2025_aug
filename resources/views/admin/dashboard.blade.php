@@ -63,7 +63,7 @@
     <!-- Financial Summary -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Financial Summary</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- Raw Income -->
             <div class="bg-blue-50 rounded-lg p-4">
                 <div class="flex items-center justify-between">
@@ -117,7 +117,21 @@
                         <i class="fas fa-chart-line text-xl"></i>
                     </div>
                 </div>
-                <p class="text-xs text-purple-700 mt-2">Raw Income - Share Bonuses - Expenses</p>
+                <p class="text-xs text-purple-700 mt-2">Raw Income - Expenses</p>
+            </div>
+            
+            <!-- Available Balance -->
+            <div class="bg-indigo-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-indigo-700">Available Balance</p>
+                        <p class="text-xl font-bold text-indigo-900">रू {{ number_format($stats['available_balance'] ?? 0, 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                        <i class="fas fa-wallet text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-indigo-700 mt-2">Net Income - Share Bonus</p>
             </div>
         </div>
     </div>
@@ -151,12 +165,18 @@
                     @foreach($stats['recent_transactions'] as $transaction)
                         <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
                             <div>
-                                <p class="font-medium text-gray-900">{{ ucfirst($transaction->type) }}</p>
-                                <p class="text-sm text-gray-600">{{ $transaction->savingsAccount->member->first_name ?? 'N/A' }} {{ $transaction->savingsAccount->member->last_name ?? '' }}</p>
+                                <p class="font-medium text-gray-900">{{ ucfirst(str_replace('_', ' ', $transaction->transaction_type)) }}</p>
+                                <p class="text-sm text-gray-600">
+                                    @if($transaction->reference_type === 'savings_account' && $transaction->savingsAccount && $transaction->savingsAccount->member)
+                                        {{ $transaction->savingsAccount->member->first_name }} {{ $transaction->savingsAccount->member->last_name }}
+                                    @else
+                                        {{ $transaction->member->first_name ?? 'N/A' }} {{ $transaction->member->last_name ?? '' }}
+                                    @endif
+                                </p>
                             </div>
                             <div class="text-right">
-                                <p class="font-semibold {{ $transaction->type === 'deposit' ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $transaction->type === 'deposit' ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
+                                <p class="font-semibold {{ in_array($transaction->transaction_type, ['deposit', 'loan_disbursement']) ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ in_array($transaction->transaction_type, ['deposit', 'loan_disbursement']) ? '+' : '-' }}रू {{ number_format($transaction->amount, 2) }}
                                 </p>
                                 <p class="text-sm text-gray-500">{{ $transaction->created_at->format('M d, Y') }}</p>
                             </div>

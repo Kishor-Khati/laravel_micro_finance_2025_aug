@@ -34,11 +34,28 @@
                         <option value="">Select Savings Type</option>
                         @foreach($savingsTypes as $type)
                             <option value="{{ $type->id }}" {{ old('savings_type_id') == $type->id ? 'selected' : '' }}>
-                                {{ $type->name }} ({{ $type->interest_rate }}% interest, Min: रू {{ $type->minimum_balance }})
+                                {{ $type->name }} ({{ $type->interest_rate }}% interest, Min: रू {{ $type->min_balance }})
                             </option>
                         @endforeach
                     </select>
                     @error('savings_type_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Branch -->
+                <div>
+                    <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
+                    <select name="branch_id" id="branch_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('branch_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -52,12 +69,12 @@
                     <p class="mt-1 text-sm text-gray-500">A unique account number will be assigned upon creation</p>
                 </div>
 
-                <!-- Initial Balance -->
+                <!-- Initial Deposit -->
                 <div>
-                    <label for="balance" class="block text-sm font-medium text-gray-700">Initial Balance (रू)</label>
-                    <input type="number" name="balance" id="balance" value="{{ old('balance', '0') }}" step="0.01" min="0" required
+                    <label for="initial_deposit" class="block text-sm font-medium text-gray-700">Initial Deposit (रू)</label>
+                    <input type="number" name="initial_deposit" id="initial_deposit" value="{{ old('initial_deposit', '0') }}" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    @error('balance')
+                    @error('initial_deposit')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -69,6 +86,20 @@
                         <span class="text-gray-600" id="interest_rate_display">Will be set based on savings type</span>
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Interest rate is determined by the selected savings type</p>
+                </div>
+
+                <!-- Opened Date -->
+                <div>
+                    <label for="opened_date" class="block text-sm font-medium text-gray-700">Account Opened Date</label>
+                    <input type="date" 
+                           id="opened_date" 
+                           name="opened_date" 
+                           value="{{ old('opened_date', now()->format('Y-m-d')) }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                           required>
+                    @error('opened_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Status -->

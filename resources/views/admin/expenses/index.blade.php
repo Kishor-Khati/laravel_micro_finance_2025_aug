@@ -95,9 +95,13 @@
             </div>
 
             <div>
-                <label for="date_from" class="block text-sm font-medium text-gray-700">Date From</label>
-                <input type="date" name="date_from" id="date_from" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
+                <label for="date_from" class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+                <input type="date" 
+                       id="date_from" 
+                       name="date_from" 
+                       value="{{ old('date_from') }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
 
             <div class="flex items-end">
                 <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">

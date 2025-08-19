@@ -16,10 +16,10 @@
                     
                     <!-- Member ID -->
                     <div>
-                        <label for="member_id" class="block text-sm font-medium text-gray-700">Member ID</label>
-                        <input type="text" name="member_id" id="member_id" value="{{ old('member_id', $member->member_id) }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('member_id')
+                        <label for="member_number" class="block text-sm font-medium text-gray-700">Member Number</label>
+                <input type="text" name="member_number" id="member_number" value="{{ old('member_number', $member->member_number) }}" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                @error('member_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -30,6 +30,16 @@
                         <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $member->first_name) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('first_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Middle Name -->
+                    <div>
+                        <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
+                        <input type="text" name="middle_name" id="middle_name" value="{{ old('middle_name', $member->middle_name) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        @error('middle_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -66,9 +76,13 @@
 
                     <!-- Date of Birth -->
                     <div>
-                        <label for="date_of_birth" class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                        <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $member->date_of_birth->format('Y-m-d')) }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <x-required-label for="date_of_birth" value="Date of Birth" />
+                        <input type="date" 
+                               id="date_of_birth" 
+                               name="date_of_birth" 
+                               value="{{ old('date_of_birth', $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
                         @error('date_of_birth')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -85,6 +99,20 @@
                             <option value="other" {{ old('gender', $member->gender) == 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                         @error('gender')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Membership Date -->
+                    <div>
+                        <x-required-label for="membership_date" value="Membership Date" />
+                        <input type="date" 
+                               id="membership_date" 
+                               name="membership_date" 
+                               value="{{ old('membership_date', $member->membership_date ? $member->membership_date->format('Y-m-d') : '') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
+                        @error('membership_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -134,63 +162,91 @@
                     <!-- Citizenship Number -->
                     <div>
                         <label for="citizenship_number" class="block text-sm font-medium text-gray-700">Citizenship Number</label>
-                        <input type="text" name="citizenship_number" id="citizenship_number" value="{{ old('citizenship_number', $member->citizenship_number) }}"
+                        <input type="text" name="citizenship_number" id="citizenship_number" value="{{ old('citizenship_number', $member->citizenship_number) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('citizenship_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Father's Name -->
+                    <!-- Monthly Income -->
                     <div>
-                        <label for="father_name" class="block text-sm font-medium text-gray-700">Father's Name</label>
-                        <input type="text" name="father_name" id="father_name" value="{{ old('father_name', $member->father_name) }}"
+                        <label for="monthly_income" class="block text-sm font-medium text-gray-700">Monthly Income</label>
+                        <input type="number" step="0.01" name="monthly_income" id="monthly_income" value="{{ old('monthly_income', $member->monthly_income) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('father_name')
+                        @error('monthly_income')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Mother's Name -->
+                    <!-- Status -->
                     <div>
-                        <label for="mother_name" class="block text-sm font-medium text-gray-700">Mother's Name</label>
-                        <input type="text" name="mother_name" id="mother_name" value="{{ old('mother_name', $member->mother_name) }}"
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select name="status" id="status" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('mother_name')
+                            <option value="active" {{ old('status', $member->status) == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status', $member->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="suspended" {{ old('status', $member->status) == 'suspended' ? 'selected' : '' }}>Suspended</option>
+                            <option value="kyc_pending" {{ old('status', $member->status) == 'kyc_pending' ? 'selected' : '' }}>KYC Pending</option>
+                        </select>
+                        @error('status')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Spouse Name -->
+                    <!-- KYC Status -->
                     <div>
-                        <label for="spouse_name" class="block text-sm font-medium text-gray-700">Spouse Name</label>
-                        <input type="text" name="spouse_name" id="spouse_name" value="{{ old('spouse_name', $member->spouse_name) }}"
+                        <label for="kyc_status" class="block text-sm font-medium text-gray-700">KYC Status</label>
+                        <select name="kyc_status" id="kyc_status" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('spouse_name')
+                            <option value="pending" {{ old('kyc_status', $member->kyc_status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="verified" {{ old('kyc_status', $member->kyc_status) == 'verified' ? 'selected' : '' }}>Verified</option>
+                            <option value="rejected" {{ old('kyc_status', $member->kyc_status) == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        </select>
+                        @error('kyc_status')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- KYC Documents -->
+                    <div>
+                        <label for="kyc_documents" class="block text-sm font-medium text-gray-700">KYC Documents</label>
+                        <textarea name="kyc_documents" id="kyc_documents" rows="2" placeholder="JSON format for document paths"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('kyc_documents', $member->kyc_documents) }}</textarea>
+                        @error('kyc_documents')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
 
-            <!-- Emergency Contact -->
+            <!-- Guardian Information -->
             <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Guardian Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Contact Name</label>
-                        <input type="text" name="emergency_contact_name" id="emergency_contact_name" value="{{ old('emergency_contact_name', $member->emergency_contact_name) }}"
+                        <label for="guardian_name" class="block text-sm font-medium text-gray-700">Guardian Name</label>
+                        <input type="text" name="guardian_name" id="guardian_name" value="{{ old('guardian_name', $member->guardian_name) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('emergency_contact_name')
+                        @error('guardian_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Contact Phone</label>
-                        <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" value="{{ old('emergency_contact_phone', $member->emergency_contact_phone) }}"
+                        <label for="guardian_phone" class="block text-sm font-medium text-gray-700">Guardian Phone</label>
+                        <input type="text" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone', $member->guardian_phone) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('emergency_contact_phone')
+                        @error('guardian_phone')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="guardian_relation" class="block text-sm font-medium text-gray-700">Guardian Relation</label>
+                        <input type="text" name="guardian_relation" id="guardian_relation" value="{{ old('guardian_relation', $member->guardian_relation) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        @error('guardian_relation')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

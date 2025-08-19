@@ -9,6 +9,7 @@ use App\Models\SavingsAccount;
 use App\Models\Transaction;
 use App\Models\LoanInstallment;
 use App\Models\Expense;
+use App\Models\ShareBonus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -52,11 +53,17 @@ class DashboardController extends Controller
             // Calculate total savings for share bonus calculation
             $totalSavings = SavingsAccount::sum('balance');
             
-            // Calculate share bonuses (based on member savings proportion of total raw income)
-            $shareBonus = $totalInterestIncome * 0.7; // 70% of raw income goes to share bonuses
+            // Calculate net income (raw income - expenses)
+            $netIncome = $totalInterestIncome - $totalExpenses;
             
-            // Calculate final balance (net income)
-            $finalBalance = $totalInterestIncome - $shareBonus - $totalExpenses;
+            // Get share bonuses from stored entries (only approved ones)
+            $shareBonus = ShareBonus::approved()->sum('amount');
+            
+            // Calculate available balance (net income - share bonus)
+            $availableBalance = $netIncome - $shareBonus;
+            
+            // Calculate final balance (same as net income)
+            $finalBalance = $netIncome;
             
             // Get members with savings for bonus highlighting
             $membersWithSavings = Member::whereHas('savingsAccounts', function($q) {
@@ -75,6 +82,7 @@ class DashboardController extends Controller
                 'total_share_bonus' => $shareBonus,
                 'total_expenses' => $totalExpenses,
                 'final_balance' => $finalBalance,
+                'available_balance' => $availableBalance,
                 'members_with_savings' => $membersWithSavings,
             ];
         } elseif ($user->isBranchManager() || $user->isFieldOfficer() || $user->isAccountant()) {
@@ -93,11 +101,17 @@ class DashboardController extends Controller
             // Calculate branch-specific total savings for share bonus calculation
             $totalSavings = SavingsAccount::where('branch_id', $branchId)->sum('balance');
             
-            // Calculate branch-specific share bonuses
-            $shareBonus = $totalInterestIncome * 0.7; // 70% of raw income goes to share bonuses
+            // Calculate branch-specific net income (raw income - expenses)
+            $netIncome = $totalInterestIncome - $totalExpenses;
             
-            // Calculate branch-specific final balance (net income)
-            $finalBalance = $totalInterestIncome - $shareBonus - $totalExpenses;
+            // Get branch-specific share bonuses from stored entries (only approved ones)
+            $shareBonus = ShareBonus::approved()->where('branch_id', $branchId)->sum('amount');
+            
+            // Calculate branch-specific available balance (net income - share bonus)
+            $availableBalance = $netIncome - $shareBonus;
+            
+            // Calculate branch-specific final balance (same as net income)
+            $finalBalance = $netIncome;
             
             // Get branch-specific members with savings for bonus highlighting
             $membersWithSavings = Member::where('branch_id', $branchId)
@@ -119,6 +133,7 @@ class DashboardController extends Controller
                 'total_share_bonus' => $shareBonus,
                 'total_expenses' => $totalExpenses,
                 'final_balance' => $finalBalance,
+                'available_balance' => $availableBalance,
                 'members_with_savings' => $membersWithSavings,
             ];
         } else {
@@ -134,11 +149,18 @@ class DashboardController extends Controller
             // Calculate total raw income
             $totalInterestIncome = LoanInstallment::where('status', 'paid')->sum('interest_amount');
             
-            // Calculate member's share bonus based on savings proportion
-            $shareBonus = 0;
+            // Calculate total net income first
+            $totalExpenses = Expense::where('status', 'approved')->sum('amount');
+            $netIncome = $totalInterestIncome - $totalExpenses;
+            
+            // Get member's share bonus from stored entries (only approved ones)
+            // For members, we'll show the total share bonus available (they don't see individual allocations)
+            $shareBonus = ShareBonus::approved()->sum('amount');
+            
+            // If member has savings, calculate their potential proportion
+            $memberShareProportion = 0;
             if ($totalSavings > 0) {
-                $savingsProportion = $memberSavings / $totalSavings;
-                $shareBonus = $totalInterestIncome * 0.7 * $savingsProportion; // 70% of raw income * member's proportion
+                $memberShareProportion = $memberSavings / $totalSavings;
             }
             
             $stats = [
@@ -149,6 +171,13 @@ class DashboardController extends Controller
                 })->pending()->count(),
                 // Member's financial data
                 'share_bonus' => $shareBonus,
+                'total_share_bonus' => $shareBonus, // For dashboard compatibility
+                'total_expenses' => 0, // Members don't see expenses
+                'members_with_savings' => collect(), // Empty collection for member view
+                'final_balance' => $shareBonus, // Member's net income (same as share bonus)
+                'total_raw_income' => $totalInterestIncome ?? 0, // Total interest income
+                'total_users' => 1, // Individual member sees only themselves
+                'total_members' => 1, // Individual member sees only themselves
             ];
         }
         

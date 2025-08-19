@@ -160,12 +160,12 @@ class ReportsController extends Controller
             'loans' => [
                 'count' => Loan::count(),
                 'active_count' => Loan::where('status', 'active')->count(),
-                'active_amount' => Loan::where('status', 'active')->sum('amount'),
-                'pending_count' => Loan::where('status', 'pending')->count(),
-                'pending_amount' => Loan::where('status', 'pending')->sum('amount'),
-                'completed_count' => Loan::where('status', 'completed')->count(),
-                'completed_amount' => Loan::where('status', 'completed')->sum('amount'),
-                'amount' => Loan::sum('amount'),
+                'active_amount' => Loan::where('status', 'active')->sum('approved_amount'),
+            'pending_count' => Loan::where('status', 'pending')->count(),
+            'pending_amount' => Loan::where('status', 'pending')->sum('approved_amount'),
+            'completed_count' => Loan::where('status', 'completed')->count(),
+            'completed_amount' => Loan::where('status', 'completed')->sum('approved_amount'),
+            'amount' => Loan::sum('approved_amount'),
             ],
             'savings' => [
                 'count' => SavingsAccount::count(),

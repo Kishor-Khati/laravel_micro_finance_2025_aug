@@ -10,7 +10,7 @@
         <div class="flex justify-between items-start">
             <div>
                 <h3 class="text-2xl font-bold text-gray-900">Transaction #{{ $transaction->id }}</h3>
-                <p class="text-gray-600">{{ $transaction->transaction_date->format('F d, Y \a\t g:i A') }}</p>
+                <p class="text-gray-600">{{ $transaction->transaction_date->format('M d, Y') }} at {{ $transaction->transaction_date->format('g:i A') }}</p>
                 
                 <div class="mt-4">
                     <span class="px-3 py-1 text-lg font-semibold rounded-full 
@@ -59,7 +59,7 @@
                 
                 <div class="border-b border-gray-200 pb-3">
                     <p class="text-sm text-gray-500">Date & Time</p>
-                    <p class="font-medium text-gray-900">{{ $transaction->transaction_date->format('F d, Y') }}</p>
+                    <p class="font-medium text-gray-900">{{ $transaction->transaction_date->format('M d, Y') }}</p>
                     <p class="text-sm text-gray-600">{{ $transaction->transaction_date->format('g:i A') }}</p>
                 </div>
                 
@@ -72,7 +72,7 @@
                 
                 <div>
                     <p class="text-sm text-gray-500">Processed</p>
-                    <p class="font-medium text-gray-900">{{ $transaction->created_at->format('F d, Y \a\t g:i A') }}</p>
+                    <p class="font-medium text-gray-900">{{ $transaction->created_at->format('M d, Y') }} at {{ $transaction->created_at->format('g:i A') }}</p>
                     <p class="text-sm text-gray-600">{{ $transaction->created_at->diffForHumans() }}</p>
                 </div>
             </div>
@@ -83,6 +83,7 @@
             <h3 class="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
             
             <!-- Account Details -->
+            @if($transaction->savingsAccount)
             <div class="mb-6">
                 <div class="border border-gray-200 rounded-lg p-4">
                     <div class="flex items-center mb-3">
@@ -90,7 +91,7 @@
                             <i class="fas fa-piggy-bank text-blue-600"></i>
                         </div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ $transaction->savingsAccount->savingsType->name }}</h4>
+                            <h4 class="font-medium text-gray-900">{{ $transaction->savingsAccount->savingsType->name ?? 'N/A' }}</h4>
                             <p class="text-sm text-gray-600">{{ $transaction->savingsAccount->account_number }}</p>
                         </div>
                     </div>
@@ -111,11 +112,13 @@
                     </div>
                 </div>
             </div>
+            @endif
             
             <!-- Member Details -->
             <div>
-                <h4 class="font-medium text-gray-900 mb-3">Account Holder</h4>
+                <h4 class="font-medium text-gray-900 mb-3">{{ $transaction->savingsAccount ? 'Account Holder' : 'Member' }}</h4>
                 <div class="border border-gray-200 rounded-lg p-4">
+                    @if($transaction->savingsAccount)
                     <div class="flex items-center mb-3">
                         <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
                             <i class="fas fa-user text-gray-600"></i>
@@ -144,6 +147,36 @@
                             <span class="text-sm font-medium">{{ $transaction->savingsAccount->member->branch->name }}</span>
                         </div>
                     </div>
+                    @else
+                    <div class="flex items-center mb-3">
+                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-900">{{ $transaction->member->first_name }} {{ $transaction->member->last_name }}</h5>
+                            <p class="text-sm text-gray-600">{{ $transaction->member->member_id }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Phone:</span>
+                            <span class="text-sm font-medium">{{ $transaction->member->phone }}</span>
+                        </div>
+                        
+                        @if($transaction->member->email)
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Email:</span>
+                            <span class="text-sm font-medium">{{ $transaction->member->email }}</span>
+                        </div>
+                        @endif
+                        
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-500">Branch:</span>
+                            <span class="text-sm font-medium">{{ $transaction->member->branch->name }}</span>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -153,6 +186,7 @@
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @if($transaction->savingsAccount)
             <a href="{{ route('admin.savings.show', $transaction->savingsAccount) }}" 
                class="flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <i class="fas fa-eye text-blue-600 mr-2"></i>
@@ -170,10 +204,24 @@
                 <i class="fas fa-plus text-purple-600 mr-2"></i>
                 <span class="font-medium text-gray-900">New Transaction</span>
             </a>
+            @else
+            <a href="{{ route('admin.members.show', $transaction->member) }}" 
+               class="flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fas fa-user text-green-600 mr-2"></i>
+                <span class="font-medium text-gray-900">View Member</span>
+            </a>
+            
+            <a href="{{ route('admin.transactions.create') }}" 
+               class="flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <i class="fas fa-plus text-purple-600 mr-2"></i>
+                <span class="font-medium text-gray-900">New Transaction</span>
+            </a>
+            @endif
         </div>
     </div>
 
     <!-- Recent Account Transactions -->
+    @if($transaction->savingsAccount)
     @php
         $recentTransactions = $transaction->savingsAccount->transactions()
             ->where('id', '!=', $transaction->id)
@@ -213,6 +261,7 @@
             </div>
         </div>
     </div>
+    @endif
     @endif
 </div>
 @endsection

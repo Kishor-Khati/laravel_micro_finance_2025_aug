@@ -39,7 +39,7 @@ class SummaryExport implements FromCollection, WithHeadings, WithMapping, Should
                 'total' => Loan::count(),
                 'active' => Loan::where('status', 'active')->count(),
                 'inactive' => Loan::where('status', '!=', 'active')->count(),
-                'amount' => Loan::sum('amount'),
+                'amount' => Loan::sum('approved_amount'),
             ],
             [
                 'type' => 'Savings',
@@ -51,8 +51,8 @@ class SummaryExport implements FromCollection, WithHeadings, WithMapping, Should
             [
                 'type' => 'Transactions',
                 'total' => Transaction::count(),
-                'deposits' => Transaction::where('type', 'deposit')->count(),
-                'withdrawals' => Transaction::where('type', 'withdrawal')->count(),
+                'deposits' => Transaction::where('transaction_type', 'deposit')->count(),
+                'withdrawals' => Transaction::where('transaction_type', 'withdrawal')->count(),
                 'amount' => Transaction::sum('amount'),
             ],
             [

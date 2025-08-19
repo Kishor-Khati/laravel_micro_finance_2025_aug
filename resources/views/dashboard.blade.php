@@ -15,6 +15,64 @@
                 </div>
             </div>
 
+            <!-- Simple Nepali Date Widget -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>
+                            आजको मिति (Today's Date)
+                        </h3>
+                        <a href="{{ route('admin.calendar') }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm">
+                            पूर्ण पात्रो हेर्नुहोस्
+                        </a>
+                    </div>
+                    
+                    <!-- Current Date Display -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                                {{ now()->format('M d, Y') }}
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ now()->format('M d, Y') }}
+                            </div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                                AD: {{ now()->format('Y-m-d') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Date Info -->
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-300">वर्ष:</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">
+                                    {{ now()->format('Y') }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-300">महिना:</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">
+                                    {{ now()->format('m') }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-300">गते:</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">
+                                    {{ now()->format('d') }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600 dark:text-gray-300">बार:</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400">
+                                    {{ now()->format('l') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Access Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Admin Panel -->

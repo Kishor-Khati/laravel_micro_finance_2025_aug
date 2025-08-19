@@ -36,6 +36,12 @@
             </div>
             
             <div class="flex space-x-2">
+                <a href="{{ route('admin.members.export.excel', $member) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" title="Export to Excel">
+                    <i class="fas fa-file-excel mr-2"></i> Excel
+                </a>
+                <a href="{{ route('admin.members.export.pdf', $member) }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg" title="Export to PDF">
+                    <i class="fas fa-file-pdf mr-2"></i> PDF
+                </a>
                 <a href="{{ route('admin.members.edit', $member) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                     <i class="fas fa-edit mr-2"></i> Edit
                 </a>
@@ -54,7 +60,13 @@
             <div class="space-y-3">
                 <div>
                     <p class="text-sm text-gray-500">Date of Birth</p>
-                    <p class="font-medium">{{ $member->date_of_birth->format('M d, Y') }} ({{ $member->date_of_birth->age }} years)</p>
+                    <p class="font-medium">
+                        @if($member->date_of_birth)
+                            {{ $member->date_of_birth->format('M d, Y') }} ({{ $member->date_of_birth->age }} years)
+                        @else
+                            Not specified
+                        @endif
+                    </p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Gender</p>

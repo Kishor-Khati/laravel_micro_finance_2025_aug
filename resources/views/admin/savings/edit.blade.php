@@ -35,11 +35,28 @@
                         <option value="">Select Savings Type</option>
                         @foreach($savingsTypes as $type)
                             <option value="{{ $type->id }}" {{ old('savings_type_id', $savingsAccount->savings_type_id) == $type->id ? 'selected' : '' }}>
-                                {{ $type->name }} ({{ $type->interest_rate }}% interest, Min: रू {{ $type->minimum_balance }})
+                                {{ $type->name }} ({{ $type->interest_rate }}% interest, Min: रू {{ $type->min_balance }})
                             </option>
                         @endforeach
                     </select>
                     @error('savings_type_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Branch -->
+                <div>
+                    <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
+                    <select name="branch_id" id="branch_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id', $savingsAccount->branch_id) == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('branch_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -66,12 +83,27 @@
                     @enderror
                 </div>
 
-                <!-- Interest Rate -->
+                <!-- Interest Earned -->
                 <div>
-                    <label for="interest_rate" class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
-                    <input type="number" name="interest_rate" id="interest_rate" value="{{ old('interest_rate', $savingsAccount->interest_rate) }}" step="0.01" min="0" max="100" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    @error('interest_rate')
+                    <label for="interest_earned" class="block text-sm font-medium text-gray-700">Interest Earned (रू)</label>
+                    <input type="number" name="interest_earned" id="interest_earned" value="{{ old('interest_earned', $savingsAccount->interest_earned) }}" step="0.01" min="0" readonly
+                        class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <p class="mt-1 text-sm text-gray-500">Total interest earned on this account</p>
+                    @error('interest_earned')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Opened Date -->
+                <div>
+                    <label for="opened_date" class="block text-sm font-medium text-gray-700">Account Opened Date</label>
+                    <input type="date" 
+                           id="opened_date" 
+                           name="opened_date" 
+                           value="{{ old('opened_date', $savingsAccount->opened_date?->format('Y-m-d')) }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                           required>
+                    @error('opened_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

@@ -26,16 +26,20 @@ class ExpenseController extends Controller
     {
         $request->validate([
             'category' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
             'amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date',
             'branch_id' => 'required|exists:branches,id',
-            'payment_method' => 'required|in:cash,bank_transfer,cheque,online',
-            'receipt_number' => 'nullable|string|max:100',
             'vendor_name' => 'nullable|string|max:255',
+            'receipt_number' => 'nullable|string|max:100',
+            'receipt_image' => 'nullable|string|max:255',
+            'status' => 'required|in:pending,approved,rejected',
+            'approval_remarks' => 'nullable|string',
         ]);
 
         $data = $request->all();
+        
         if (Auth::check()) {
             $data['requested_by'] = Auth::user()->id;
         } else {
@@ -63,16 +67,27 @@ class ExpenseController extends Controller
     {
         $request->validate([
             'category' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
             'amount' => 'required|numeric|min:0',
-            'expense_date' => 'required|date',
+            'expense_date' => 'required|string',
             'branch_id' => 'required|exists:branches,id',
-            'payment_method' => 'required|in:cash,bank_transfer,cheque,online',
-            'receipt_number' => 'nullable|string|max:100',
             'vendor_name' => 'nullable|string|max:255',
+            'receipt_number' => 'nullable|string|max:100',
+            'receipt_image' => 'nullable|string|max:255',
+            'status' => 'required|in:pending,approved,rejected',
+            'approval_remarks' => 'nullable|string',
         ]);
 
-        $expense->update($request->all());
+        $data = $request->all();
+        
+        // Use AD date for database storage (from hidden _ad field)
+        if (isset($data['expense_date_ad'])) {
+            $data['expense_date'] = $data['expense_date_ad'];
+            unset($data['expense_date_ad']);
+        }
+        
+        $expense->update($data);
 
         return redirect()->route('admin.expenses.show', $expense)->with('success', 'Expense updated successfully!');
     }

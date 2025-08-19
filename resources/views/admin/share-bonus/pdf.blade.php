@@ -143,7 +143,7 @@
             <div class="summary-note">Total loan interest</div>
         </div>
         <div class="summary-item">
-            <div class="summary-label">Share Bonus (30%)</div>
+            <div class="summary-label">Share Bonus ({{ number_format((request('share_bonus_percentage') ?? 30), 2) }}%)</div>
             <div class="summary-value">{{ number_format($data['share_bonus']['total_share_bonus'], 2) }}</div>
             <div class="summary-note">Distributed to members</div>
         </div>
@@ -155,7 +155,7 @@
         <div class="summary-item">
             <div class="summary-label">Net Income</div>
             <div class="summary-value">{{ number_format($data['final_balance'], 2) }}</div>
-            <div class="summary-note">After share bonus & expenses</div>
+            <div class="summary-note">Raw income after expenses</div>
         </div>
     </div>
     

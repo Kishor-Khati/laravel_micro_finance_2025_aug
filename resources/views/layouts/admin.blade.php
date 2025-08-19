@@ -11,9 +11,15 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Flatpickr CSS - Removed to prevent conflict with Nepali Date Picker -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> -->
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Additional Styles -->
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen flex">
@@ -36,6 +42,11 @@
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.dashboard') ? 'bg-gray-800 text-white' : '' }}">
                     <i class="fas fa-tachometer-alt mr-3"></i>
                     Dashboard
+                </a>
+
+                <a href="{{ route('admin.calendar') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.calendar') ? 'bg-gray-800 text-white' : '' }}">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    Calender
                 </a>
 
                 <div class="px-6 py-2 mt-6">
@@ -97,7 +108,7 @@
                 
                 <a href="{{ route('admin.share-bonus.index') }}" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white {{ request()->routeIs('admin.share-bonus*') ? 'bg-gray-800 text-white' : '' }}">
                     <i class="fas fa-percentage mr-3"></i>
-                    Share Bonus Statements
+                    Share Bonus
                 </a>
 
                 <div class="px-6 py-2 mt-6">
@@ -237,6 +248,16 @@
             form.submit();
         }
     </script>
+    
+    <!-- Flatpickr JavaScript - Removed to prevent conflict with Nepali Date Picker -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> -->
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Additional Scripts -->
+    @stack('scripts')
+    
     <x-sweet-alert />
 </body>
 </html>

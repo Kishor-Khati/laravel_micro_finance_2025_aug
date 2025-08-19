@@ -15,10 +15,10 @@
                     
                     <!-- Member ID -->
                     <div>
-                        <x-required-label for="member_id" value="Member ID" />
-                        <input type="text" name="member_id" id="member_id" value="{{ old('member_id') }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('member_id')
+                        <x-required-label for="member_number" value="Member Number" />
+                <input type="text" name="member_number" id="member_number" value="{{ old('member_number') }}" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                @error('member_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -29,6 +29,16 @@
                         <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('first_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Middle Name -->
+                    <div>
+                        <x-label for="middle_name" value="Middle Name" />
+                        <input type="text" name="middle_name" id="middle_name" value="{{ old('middle_name') }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        @error('middle_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -66,8 +76,12 @@
                     <!-- Date of Birth -->
                     <div>
                         <x-required-label for="date_of_birth" value="Date of Birth" />
-                        <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth') }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="date" 
+                               id="date_of_birth" 
+                               name="date_of_birth" 
+                               value="{{ old('date_of_birth') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
                         @error('date_of_birth')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -84,6 +98,20 @@
                             <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                         @error('gender')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Membership Date -->
+                    <div>
+                        <x-required-label for="membership_date" value="Membership Date" />
+                        <input type="date" 
+                               id="membership_date" 
+                               name="membership_date" 
+                               value="{{ old('membership_date', now()->format('Y-m-d')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
+                        @error('membership_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -132,64 +160,63 @@
 
                     <!-- Citizenship Number -->
                     <div>
-                        <x-label for="citizenship_number" value="Citizenship Number" />
-                        <input type="text" name="citizenship_number" id="citizenship_number" value="{{ old('citizenship_number') }}"
+                        <x-required-label for="citizenship_number" value="Citizenship Number" />
+                        <input type="text" name="citizenship_number" id="citizenship_number" value="{{ old('citizenship_number') }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @error('citizenship_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Father's Name -->
+                    <!-- Monthly Income -->
                     <div>
-                        <x-label for="father_name" value="Father's Name" />
-                        <input type="text" name="father_name" id="father_name" value="{{ old('father_name') }}"
+                        <x-label for="monthly_income" value="Monthly Income" />
+                        <input type="number" step="0.01" name="monthly_income" id="monthly_income" value="{{ old('monthly_income') }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('father_name')
+                        @error('monthly_income')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <!-- Mother's Name -->
+                    <!-- KYC Documents -->
                     <div>
-                        <x-label for="mother_name" value="Mother's Name" />
-                        <input type="text" name="mother_name" id="mother_name" value="{{ old('mother_name') }}"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('mother_name')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Spouse Name -->
-                    <div>
-                        <x-label for="spouse_name" value="Spouse Name" />
-                        <input type="text" name="spouse_name" id="spouse_name" value="{{ old('spouse_name') }}"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('spouse_name')
+                        <x-label for="kyc_documents" value="KYC Documents" />
+                        <textarea name="kyc_documents" id="kyc_documents" rows="2" placeholder="JSON format for document paths"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('kyc_documents') }}</textarea>
+                        @error('kyc_documents')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
 
-            <!-- Emergency Contact -->
+            <!-- Guardian Information -->
             <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Guardian Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <x-label for="emergency_contact_name" value="Contact Name" />
-                        <input type="text" name="emergency_contact_name" id="emergency_contact_name" value="{{ old('emergency_contact_name') }}"
+                        <x-label for="guardian_name" value="Guardian Name" />
+                        <input type="text" name="guardian_name" id="guardian_name" value="{{ old('guardian_name') }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('emergency_contact_name')
+                        @error('guardian_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <x-label for="emergency_contact_phone" value="Contact Phone" />
-                        <input type="text" name="emergency_contact_phone" id="emergency_contact_phone" value="{{ old('emergency_contact_phone') }}"
+                        <x-label for="guardian_phone" value="Guardian Phone" />
+                        <input type="text" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone') }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('emergency_contact_phone')
+                        @error('guardian_phone')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <x-label for="guardian_relation" value="Guardian Relation" />
+                        <input type="text" name="guardian_relation" id="guardian_relation" value="{{ old('guardian_relation') }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        @error('guardian_relation')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>

@@ -25,9 +25,9 @@ class MemberController extends Controller
             ->orderBy('created_at', 'desc');
             
         // Apply branch filter for users without all-branches permission
-        if (!Auth::user()->hasPermission('view-all-branches')) {
-            $query->where('branch_id', Auth::user()->branch_id);
-        }
+        // if (!Auth::user()->hasPermission('view-all-branches')) {
+        //     $query->where('branch_id', Auth::user()->branch_id);
+        // }
         
         // Apply filters
         if ($request->filled('search')) {
@@ -66,7 +66,7 @@ class MemberController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|string',
             'gender' => 'required|in:male,female,other',
             'citizenship_number' => 'required|string|unique:members,citizenship_number',
             'phone' => 'required|string|max:20',
@@ -84,6 +84,11 @@ class MemberController extends Controller
         // Generate member number
         $validatedData['member_number'] = $this->generateMemberNumber();
         $validatedData['membership_date'] = now();
+        
+        // Use AD date for database storage (from hidden _ad field)
+        if (isset($request->date_of_birth_ad)) {
+            $validatedData['date_of_birth'] = $request->date_of_birth_ad;
+        }
         
         // Handle KYC document uploads
         if ($request->hasFile('kyc_documents')) {
@@ -119,7 +124,7 @@ class MemberController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|string',
             'gender' => 'required|in:male,female,other',
             'citizenship_number' => 'required|string|unique:members,citizenship_number,' . $member->id,
             'phone' => 'required|string|max:20',
@@ -134,6 +139,11 @@ class MemberController extends Controller
             'status' => 'required|in:active,inactive,suspended,kyc_pending',
             'kyc_status' => 'required|in:pending,verified,rejected',
         ]);
+        
+        // Use AD date for database storage (from hidden _ad field)
+        if (isset($request->date_of_birth_ad)) {
+            $validatedData['date_of_birth'] = $request->date_of_birth_ad;
+        }
         
         $member->update($validatedData);
         

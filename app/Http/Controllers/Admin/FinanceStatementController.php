@@ -10,8 +10,10 @@ use App\Models\SavingsAccount;
 use App\Models\Transaction;
 use App\Models\Expense;
 use App\Models\Branch;
+use App\Models\ShareBonus;
 use App\Exports\FinanceStatementsExport;
 use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
@@ -44,10 +46,11 @@ class FinanceStatementController extends Controller
         } else {
             $request->validate([
                 'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date',
+                'end_date' => 'required|date',
                 'branch_id' => 'nullable|exists:branches,id',
             ]);
             
+            // Parse English dates directly
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
         }
@@ -57,14 +60,17 @@ class FinanceStatementController extends Controller
         // Get all financial data for the period
         $data = $this->getFinancialData($startDate, $endDate, $branchId);
         
-        // Calculate share bonuses based on savings balances
-        $shareBonus = $this->calculateShareBonus($data['total_raw_income'], $startDate, $endDate, $branchId);
+        // Calculate net income (raw income - expenses)
+        $data['net_income'] = $data['total_raw_income'] - $data['total_expenses'];
+        
+        // Calculate share bonuses based on net income
+        $shareBonus = $this->calculateShareBonus($data['net_income'], $startDate, $endDate, $branchId);
         
         // Add share bonus data to the financial data
         $data['share_bonus'] = $shareBonus;
         
-        // Calculate final balance
-        $data['final_balance'] = $data['total_raw_income'] - $shareBonus['total_share_bonus'] - $data['total_expenses'];
+        // Final balance remains the same as net income (share bonus is distributed from net income, not deducted)
+        $data['final_balance'] = $data['net_income'];
         
         // Check if export is requested
         if ($request->has('export')) {
@@ -94,13 +100,17 @@ class FinanceStatementController extends Controller
             $endDate = Carbon::now()->endOfDay();
         } else {
             $request->validate([
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date',
+                'start_date' => 'required|string',
+                'end_date' => 'required|string',
                 'branch_id' => 'nullable|exists:branches,id',
             ]);
             
-            $startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            // Use AD dates for database processing (from hidden _ad fields)
+            $startDateAD = $request->start_date_ad ?? $request->start_date;
+            $endDateAD = $request->end_date_ad ?? $request->end_date;
+            
+            $startDate = Carbon::parse($startDateAD)->startOfDay();
+            $endDate = Carbon::parse($endDateAD)->endOfDay();
         }
         
         $branchId = $request->branch_id;
@@ -108,14 +118,17 @@ class FinanceStatementController extends Controller
         // Get all financial data for the period
         $data = $this->getFinancialData($startDate, $endDate, $branchId);
         
-        // Calculate share bonuses based on savings balances
-        $shareBonus = $this->calculateShareBonus($data['total_raw_income'], $startDate, $endDate, $branchId);
+        // Calculate net income (raw income - expenses)
+        $data['net_income'] = $data['total_raw_income'] - $data['total_expenses'];
+        
+        // Calculate share bonuses based on net income
+        $shareBonus = $this->calculateShareBonus($data['net_income'], $startDate, $endDate, $branchId);
         
         // Add share bonus data to the financial data
         $data['share_bonus'] = $shareBonus;
         
-        // Calculate final balance
-        $data['final_balance'] = $data['total_raw_income'] - $shareBonus['total_share_bonus'] - $data['total_expenses'];
+        // Final balance remains the same as net income (share bonus is distributed from net income, not deducted)
+        $data['final_balance'] = $data['net_income'];
         
         return $this->exportPdfData($data, $startDate, $endDate);
     }
@@ -145,8 +158,8 @@ class FinanceStatementController extends Controller
             $endDate = Carbon::now()->endOfDay();
         } else {
             $request->validate([
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date',
+                'start_date' => ['required', 'date'],
+                'end_date' => ['required', 'date'],
                 'branch_id' => 'nullable|exists:branches,id',
             ]);
             
@@ -159,14 +172,17 @@ class FinanceStatementController extends Controller
         // Get all financial data for the period
         $data = $this->getFinancialData($startDate, $endDate, $branchId);
         
-        // Calculate share bonuses based on savings balances
-        $shareBonus = $this->calculateShareBonus($data['total_raw_income'], $startDate, $endDate, $branchId);
+        // Calculate net income (raw income - expenses)
+        $data['net_income'] = $data['total_raw_income'] - $data['total_expenses'];
+        
+        // Calculate share bonuses based on net income
+        $shareBonus = $this->calculateShareBonus($data['net_income'], $startDate, $endDate, $branchId);
         
         // Add share bonus data to the financial data
         $data['share_bonus'] = $shareBonus;
         
-        // Calculate final balance
-        $data['final_balance'] = $data['total_raw_income'] - $shareBonus['total_share_bonus'] - $data['total_expenses'];
+        // Final balance remains the same as net income (share bonus is distributed from net income, not deducted)
+        $data['final_balance'] = $data['net_income'];
         
         return $this->exportExcelData($data, $startDate, $endDate);
     }
@@ -212,7 +228,7 @@ class FinanceStatementController extends Controller
             'total_expenses' => $totalExpenses,
             'loans' => [
                 'total' => $loanQuery->count(),
-                'amount' => $loanQuery->sum('amount'),
+                'amount' => $loanQuery->sum('approved_amount'),
                 'active' => $loanQuery->where('status', 'active')->count(),
             ],
             'savings' => [
@@ -233,7 +249,20 @@ class FinanceStatementController extends Controller
      */
     private function calculateShareBonus($totalRawIncome, $startDate, $endDate, $branchId = null)
     {
-        // Get all active savings accounts
+        // Get stored share bonus entries within the date range
+        $shareBonusQuery = ShareBonus::approved()
+            ->whereBetween('date', [$startDate, $endDate]);
+        
+        if ($branchId) {
+            $shareBonusQuery->where('branch_id', $branchId);
+        }
+        
+        $shareBonusEntries = $shareBonusQuery->get();
+        
+        // Calculate total share bonus from stored entries
+        $totalShareBonus = $shareBonusEntries->sum('amount');
+        
+        // Get all active savings accounts for display purposes
         $savingsQuery = SavingsAccount::where('status', 'active');
         
         if ($branchId) {
@@ -242,34 +271,15 @@ class FinanceStatementController extends Controller
         
         $savingsAccounts = $savingsQuery->with('member')->get();
         
-        // Calculate total savings balance
-        $totalSavingsBalance = $savingsAccounts->sum('balance');
-        
-        // If no savings, return zero bonus
-        if ($totalSavingsBalance <= 0) {
-            return [
-                'total_share_bonus' => 0,
-                'members_with_savings' => collect(),
-                'bonus_details' => [],
-            ];
-        }
-        
-        // Allocate 30% of raw income as share bonus
-        $totalShareBonus = $totalRawIncome * 0.3;
-        
-        // Calculate individual share bonuses based on proportion of savings
+        // Create bonus details from stored entries
         $bonusDetails = [];
-        foreach ($savingsAccounts as $account) {
-            $proportion = $account->balance / $totalSavingsBalance;
-            $individualBonus = $totalShareBonus * $proportion;
-            
+        foreach ($shareBonusEntries as $entry) {
             $bonusDetails[] = [
-                'account_id' => $account->id,
-                'account_number' => $account->account_number,
-                'member_name' => $account->member->first_name . ' ' . $account->member->last_name,
-                'savings_balance' => $account->balance,
-                'proportion' => $proportion,
-                'bonus_amount' => $individualBonus,
+                'title' => $entry->title,
+                'amount' => $entry->amount,
+                'date' => $entry->date,
+                'description' => $entry->description,
+                'branch' => $entry->branch ? $entry->branch->name : 'All Branches',
             ];
         }
         

@@ -38,10 +38,10 @@
                 <a href="{{ route('admin.reports.financial') }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-block text-center">
                     View Reports
                 </a>
-                <a href="{{ route('reports.transactions.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.transactions.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-excel"></i>
                 </a>
-                <a href="{{ route('reports.transactions.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.transactions.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
@@ -73,10 +73,10 @@
                 <a href="{{ route('admin.reports.members') }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-block text-center">
                     View Reports
                 </a>
-                <a href="{{ route('reports.members.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.members.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-excel"></i>
                 </a>
-                <a href="{{ route('reports.members.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.members.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
@@ -108,10 +108,10 @@
                 <a href="{{ route('admin.reports.loans') }}" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg inline-block text-center">
                     View Reports
                 </a>
-                <a href="{{ route('reports.loans.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.loans.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-excel"></i>
                 </a>
-                <a href="{{ route('reports.loans.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.loans.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
@@ -143,10 +143,10 @@
                 <a href="{{ route('admin.reports.branches') }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg inline-block text-center">
                     View Reports
                 </a>
-                <a href="{{ route('reports.branches.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.branches.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-excel"></i>
                 </a>
-                <a href="{{ route('reports.branches.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.branches.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-pdf"></i>
                 </a>
             </div>
@@ -213,10 +213,10 @@
                 <a href="{{ route('admin.reports.summary') }}" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg inline-block text-center">
                     View Reports
                 </a>
-                <a href="{{ route('reports.summary.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.summary.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-excel"></i>
                 </a>
-                <a href="{{ route('reports.summary.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
+                <a href="{{ route('admin.reports.summary.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg inline-flex items-center justify-center">
                     <i class="fas fa-file-pdf"></i>
                 </a>
             </div>

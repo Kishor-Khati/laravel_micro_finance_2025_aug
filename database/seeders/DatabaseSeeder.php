@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             LoanTypeSeeder::class,
             SavingsTypeSeeder::class,
             MemberSeeder::class,
+            DemoDataSeeder::class,
         ]);
     }
 }

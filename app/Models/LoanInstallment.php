@@ -22,6 +22,12 @@ class LoanInstallment extends Model
         'paid_date',
         'status',
         'remarks',
+        'penalty_amount',
+        'penalty_rate',
+        'days_overdue',
+        'penalty_calculated_date',
+        'penalty_waived',
+        'penalty_remarks',
     ];
 
     protected $casts = [
@@ -30,8 +36,12 @@ class LoanInstallment extends Model
         'total_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
         'outstanding_amount' => 'decimal:2',
+        'penalty_amount' => 'decimal:2',
+        'penalty_rate' => 'decimal:2',
         'due_date' => 'date',
         'paid_date' => 'date',
+        'penalty_calculated_date' => 'date',
+        'penalty_waived' => 'boolean',
     ];
 
     // Relationships
@@ -65,5 +75,53 @@ class LoanInstallment extends Model
     {
         return $this->status === 'overdue' || 
                ($this->status === 'pending' && $this->due_date < now());
+    }
+
+    public function calculateDaysOverdue(): int
+    {
+        if (!$this->isOverdue()) {
+            return 0;
+        }
+        
+        return now()->diffInDays($this->due_date);
+    }
+
+    public function calculatePenalty(float $dailyPenaltyRate = 0.1): float
+    {
+        if (!$this->isOverdue() || $this->penalty_waived) {
+            return 0;
+        }
+
+        $daysOverdue = $this->calculateDaysOverdue();
+        $penaltyAmount = ($this->outstanding_amount * $dailyPenaltyRate / 100) * $daysOverdue;
+        
+        return round($penaltyAmount, 2);
+    }
+
+    public function updatePenalty(float $dailyPenaltyRate = 0.1): void
+    {
+        if ($this->isOverdue() && !$this->penalty_waived) {
+            $this->update([
+                'days_overdue' => $this->calculateDaysOverdue(),
+                'penalty_rate' => $dailyPenaltyRate,
+                'penalty_amount' => $this->calculatePenalty($dailyPenaltyRate),
+                'penalty_calculated_date' => now()->toDateString(),
+                'status' => 'overdue'
+            ]);
+        }
+    }
+
+    public function getTotalAmountWithPenalty(): float
+    {
+        return $this->outstanding_amount + $this->penalty_amount;
+    }
+
+    public function waivePenalty(string $reason = null): void
+    {
+        $this->update([
+            'penalty_waived' => true,
+            'penalty_remarks' => $reason ?? 'Penalty waived by admin',
+            'penalty_amount' => 0
+        ]);
     }
 }

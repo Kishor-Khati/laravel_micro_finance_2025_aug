@@ -22,58 +22,83 @@ class TransactionController extends Controller
 
     public function show(Transaction $transaction)
     {
-        $transaction->load(['reference', 'member', 'branch', 'processedBy']);
+        $transaction->load(['reference', 'member', 'branch', 'processedBy', 'savingsAccount.savingsType']);
         return view('admin.transactions.show', compact('transaction'));
     }
 
     public function create()
     {
         $savingsAccounts = SavingsAccount::with('member')->get();
-        return view('admin.transactions.create', compact('savingsAccounts'));
+        $members = \App\Models\Member::all();
+        $branches = \App\Models\Branch::all();
+        return view('admin.transactions.create', compact('savingsAccounts', 'members', 'branches'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'savings_account_id' => 'required|exists:savings_accounts,id',
-            'transaction_type' => 'required|in:deposit,withdrawal',
+            'member_id' => 'required|exists:members,id',
+            'branch_id' => 'required|exists:branches,id',
+            'transaction_type' => 'required|in:deposit,withdrawal,loan_disbursement,loan_payment,interest_earned,fee_charge',
             'amount' => 'required|numeric|min:0.01',
+            'interest_amount' => 'nullable|numeric|min:0',
+            'reference_type' => 'nullable|string|max:255',
+            'reference_id' => 'nullable|integer',
             'description' => 'nullable|string|max:255',
+            'transaction_date' => 'required|date',
         ]);
 
-        $savingsAccount = SavingsAccount::findOrFail($request->savings_account_id);
-
-        if ($request->transaction_type === 'withdrawal' && $request->amount > $savingsAccount->balance) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient balance for withdrawal.']);
+        // Get member's savings account if transaction involves savings
+        $savingsAccount = null;
+        $previousBalance = 0;
+        $newBalance = 0;
+        
+        if (in_array($request->transaction_type, ['deposit', 'withdrawal'])) {
+            $savingsAccount = SavingsAccount::where('member_id', $request->member_id)
+                ->where('branch_id', $request->branch_id)
+                ->where('status', 'active')
+                ->first();
+                
+            if (!$savingsAccount) {
+                return redirect()->back()->withErrors(['member_id' => 'No active savings account found for this member.']);
+            }
+            
+            if ($request->transaction_type === 'withdrawal' && $request->amount > $savingsAccount->balance) {
+                return redirect()->back()->withErrors(['amount' => 'Insufficient balance for withdrawal.']);
+            }
+            
+            // Calculate previous and new balance
+            $previousBalance = $savingsAccount->balance;
+            $newBalance = $request->transaction_type === 'deposit' 
+                ? $previousBalance + $request->amount 
+                : $previousBalance - $request->amount;
+            
+            // Update savings account balance
+            $savingsAccount->balance = $newBalance;
+            $savingsAccount->save();
         }
 
-        // Calculate previous and new balance
-        $previousBalance = $savingsAccount->balance;
-        $newBalance = $request->transaction_type === 'deposit' 
-            ? $previousBalance + $request->amount 
-            : $previousBalance - $request->amount;
-
-        // Update savings account balance
-        $savingsAccount->balance = $newBalance;
-        $savingsAccount->save();
-
+        // Use AD date for database storage (from hidden _ad field)
+        $transactionDate = $request->transaction_date_ad ?? $request->transaction_date;
+        
         // Create transaction record
         Transaction::create([
             'transaction_number' => $this->generateTransactionNumber(),
-            'member_id' => $savingsAccount->member_id,
-            'branch_id' => $savingsAccount->branch_id,
+            'member_id' => $request->member_id,
+            'branch_id' => $request->branch_id,
             'processed_by' => Auth::check() ? Auth::user()->id : null,
             'transaction_type' => $request->transaction_type,
             'amount' => $request->amount,
-            'previous_balance' => $previousBalance,
-            'new_balance' => $newBalance,
+            'interest_amount' => $request->interest_amount ?? 0,
+            'balance_before' => $previousBalance,
+            'balance_after' => $newBalance,
+            'reference_type' => $request->reference_type,
+            'reference_id' => $request->reference_id,
             'description' => $request->description,
-            'transaction_date' => now(),
-            'reference_type' => 'App\Models\SavingsAccount',
-            'reference_id' => $savingsAccount->id
+            'transaction_date' => $transactionDate,
         ]);
 
-        return redirect()->route('admin.transactions')->with('success', 'Transaction processed successfully!');
+        return redirect()->route('admin.transactions.index')->with('success', 'Transaction processed successfully!');
     }
     
     /**

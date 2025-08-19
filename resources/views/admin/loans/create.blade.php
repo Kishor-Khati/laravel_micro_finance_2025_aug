@@ -43,12 +43,12 @@
                     @enderror
                 </div>
 
-                <!-- Loan Amount -->
+                <!-- Requested Amount -->
                 <div>
-                    <label for="amount" class="block text-sm font-medium text-gray-700">Loan Amount (रू)</label>
-                    <input type="number" name="amount" id="amount" value="{{ old('amount') }}" step="0.01" min="0" required
+                    <label for="requested_amount" class="block text-sm font-medium text-gray-700">Requested Amount (रू)</label>
+                    <input type="number" name="requested_amount" id="requested_amount" value="{{ old('requested_amount') }}" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    @error('amount')
+                    @error('requested_amount')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -63,12 +63,12 @@
                     @enderror
                 </div>
 
-                <!-- Loan Term -->
+                <!-- Duration Months -->
                 <div>
-                    <label for="term_months" class="block text-sm font-medium text-gray-700">Loan Term (Months)</label>
-                    <input type="number" name="term_months" id="term_months" value="{{ old('term_months') }}" min="1" required
+                    <label for="duration_months" class="block text-sm font-medium text-gray-700">Duration (Months)</label>
+                    <input type="number" name="duration_months" id="duration_months" value="{{ old('duration_months') }}" min="1" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    @error('term_months')
+                    @error('duration_months')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -76,9 +76,110 @@
                 <!-- Purpose -->
                 <div>
                     <label for="purpose" class="block text-sm font-medium text-gray-700">Loan Purpose</label>
-                    <textarea name="purpose" id="purpose" rows="3"
+                    <textarea name="purpose" id="purpose" rows="3" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('purpose') }}</textarea>
                     @error('purpose')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Collateral -->
+                <div>
+                    <label for="collateral" class="block text-sm font-medium text-gray-700">Collateral</label>
+                    <textarea name="collateral" id="collateral" rows="3"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('collateral') }}</textarea>
+                    @error('collateral')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Loan Number -->
+                <div>
+                    <label for="loan_number" class="block text-sm font-medium text-gray-700">Loan Number</label>
+                    <input type="text" name="loan_number" id="loan_number" value="{{ old('loan_number') }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="Leave empty for auto-generation">
+                    @error('loan_number')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Branch -->
+                <div>
+                    <label for="branch_id" class="block text-sm font-medium text-gray-700">Branch</label>
+                    <select name="branch_id" id="branch_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('branch_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Approved Amount -->
+                <div>
+                    <label for="approved_amount" class="block text-sm font-medium text-gray-700">Approved Amount (रू)</label>
+                    <input type="number" name="approved_amount" id="approved_amount" value="{{ old('approved_amount') }}" step="0.01" min="0"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @error('approved_amount')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Application Date -->
+                <div>
+                    <label for="application_date" class="block text-sm font-medium text-gray-700">Application Date</label>
+                    <input type="date" 
+                           id="application_date" 
+                           name="application_date" 
+                           value="{{ old('application_date', now()->format('Y-m-d')) }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                           required>
+                    @error('application_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Approved Date -->
+                <div>
+                    <label for="approved_date" class="block text-sm font-medium text-gray-700">Approved Date</label>
+                    <input type="date" 
+                           id="approved_date" 
+                           name="approved_date" 
+                           value="{{ old('approved_date') }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @error('approved_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Disbursed Date -->
+                <div>
+                    <label for="disbursed_date" class="block text-sm font-medium text-gray-700">Disbursed Date</label>
+                    <input type="date" 
+                           id="disbursed_date" 
+                           name="disbursed_date" 
+                           value="{{ old('disbursed_date') }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @error('disbursed_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Maturity Date -->
+                <div>
+                    <label for="maturity_date" class="block text-sm font-medium text-gray-700">Maturity Date</label>
+                    <input type="date" 
+                           id="maturity_date" 
+                           name="maturity_date" 
+                           value="{{ old('maturity_date') }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @error('maturity_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -90,11 +191,21 @@
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="disbursed" {{ old('status') == 'disbursed' ? 'selected' : '' }}>Disbursed</option>
                         <option value="closed" {{ old('status') == 'closed' ? 'selected' : '' }}>Closed</option>
-                        <option value="defaulted" {{ old('status') == 'defaulted' ? 'selected' : '' }}>Defaulted</option>
+                        <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                     </select>
                     @error('status')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Remarks -->
+                <div>
+                    <label for="remarks" class="block text-sm font-medium text-gray-700">Remarks</label>
+                    <textarea name="remarks" id="remarks" rows="3"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('remarks') }}</textarea>
+                    @error('remarks')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -138,9 +249,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const amountInput = document.getElementById('amount');
+    const amountInput = document.getElementById('requested_amount');
     const interestInput = document.getElementById('interest_rate');
-    const termInput = document.getElementById('term_months');
+    const termInput = document.getElementById('duration_months');
     
     function calculateLoan() {
         const amount = parseFloat(amountInput.value) || 0;

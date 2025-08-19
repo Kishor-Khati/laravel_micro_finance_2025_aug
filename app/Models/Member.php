@@ -68,6 +68,11 @@ class Member extends Model
         return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
     }
 
+    public function getMemberIdAttribute(): string
+    {
+        return $this->member_number;
+    }
+
     // Scopes
     public function scopeActive($query)
     {

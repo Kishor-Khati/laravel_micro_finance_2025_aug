@@ -11,10 +11,18 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\ShareBonusController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+
+
+Route::get('/test-member-edit', function () {
+    $member = \App\Models\Member::find(1);
+    return view('members.edit', compact('member'));
 });
 
 // Language switching
@@ -23,6 +31,8 @@ Route::post('/language/switch', [LanguageController::class, 'switch'])->name('la
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -33,6 +43,7 @@ Route::middleware('auth')->group(function () {
 // Admin Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/calendar', [AdminController::class, 'calendar'])->name('calendar');
     
     // Form Components Demo
     Route::match(['get', 'post'], '/form-demo', [AdminController::class, 'formDemo'])->name('form-demo');
@@ -68,9 +79,20 @@ Route::get('/reports/summary/pdf', [ReportsController::class, 'exportSummaryPdf'
     
     // Members Management
     Route::resource('members', AdminMemberController::class);
+    Route::get('/members/{member}/export/excel', [AdminMemberController::class, 'exportExcel'])->name('members.export.excel');
+    Route::get('/members/{member}/export/pdf', [AdminMemberController::class, 'exportPdf'])->name('members.export.pdf');
     
     // Loans Management
     Route::resource('loans', AdminLoanController::class);
+    Route::post('/loans/{loan}/approve', [AdminLoanController::class, 'approve'])->name('loans.approve');
+    Route::post('/loans/{loan}/disburse', [AdminLoanController::class, 'disburse'])->name('loans.disburse');
+    Route::post('/loans/{loan}/reject', [AdminLoanController::class, 'reject'])->name('loans.reject');
+    
+    // Penalty Management
+    Route::post('/loans/calculate-penalties', [AdminLoanController::class, 'calculatePenalties'])->name('loans.calculate-penalties');
+    Route::post('/loans/{loan}/waive-penalties', [AdminLoanController::class, 'waiveLoanPenalties'])->name('loans.waive-penalties');
+    Route::post('/installments/{installment}/waive-penalty', [AdminLoanController::class, 'waivePenalty'])->name('installments.waive-penalty');
+    Route::get('/loans/penalty-statistics', [AdminLoanController::class, 'penaltyStatistics'])->name('loans.penalty-statistics');
     
     // Savings Management
     Route::resource('savings', AdminSavingsController::class);
@@ -103,13 +125,24 @@ Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/export-excel', [\App\Http\Controllers\Admin\FinanceStatementController::class, 'exportExcel'])->name('export-excel');
     });
     
-    // Share Bonus Statements
+    // Share Bonus Generation and Management
     Route::prefix('share-bonus')->name('share-bonus.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\ShareBonusController::class, 'index'])->name('index');
-        Route::post('/generate', [\App\Http\Controllers\Admin\ShareBonusController::class, 'generate'])->name('generate');
-        Route::get('/export-pdf', [\App\Http\Controllers\Admin\ShareBonusController::class, 'exportPdf'])->name('export-pdf');
-        Route::get('/export-excel', [\App\Http\Controllers\Admin\ShareBonusController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/', [ShareBonusController::class, 'index'])->name('index');
+        Route::post('/generate', [ShareBonusController::class, 'generate'])->name('generate');
+        Route::get('/generate', function () {
+            return redirect()->route('admin.share-bonus.index')
+                ->with('error', 'Please use the form below to generate a share bonus statement.');
+        });
+        Route::post('/apply', [ShareBonusController::class, 'apply'])->name('apply');
+        Route::post('/undo', [ShareBonusController::class, 'undo'])->name('undo');
+        Route::get('/{id}/show', [ShareBonusController::class, 'show'])->name('show');
+        Route::get('/{id}/print', [ShareBonusController::class, 'print'])->name('print');
+        Route::get('/{id}/export-pdf', [ShareBonusController::class, 'exportPDF'])->name('export-pdf');
+        Route::get('/{id}/export-excel', [ShareBonusController::class, 'exportExcel'])->name('export-excel');
+        Route::delete('/{id}', [ShareBonusController::class, 'destroy'])->name('destroy');
     });
+    
+
 });
 
 require __DIR__.'/auth.php';

@@ -35,10 +35,10 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">{{ $loan->loanType->name }}</div>
-                        <div class="text-sm text-gray-500">{{ $loan->interest_rate }}% - {{ $loan->term_months }} months</div>
+                        <div class="text-sm text-gray-500">{{ $loan->interest_rate }}% - {{ $loan->duration_months }} months</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">रू {{ number_format($loan->amount, 2) }}</div>
+                        <div class="text-sm font-medium text-gray-900">रू {{ number_format($loan->approved_amount ?? $loan->requested_amount, 2) }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

@@ -6,7 +6,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto">
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="POST" action="{{ route('admin.expenses.store') }}">
+        <form method="POST" action="{{ route('admin.expenses.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="space-y-6">
                 <!-- Expense Category -->
@@ -28,6 +28,17 @@
                         <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Other</option>
                     </select>
                     @error('category')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" name="title" id="title" value="{{ old('title') }}" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <p class="mt-1 text-sm text-gray-500">Brief title for the expense</p>
+                    @error('title')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -55,12 +66,13 @@
                     </div>
 
                     <div>
-                        <label for="expense_date" class="block text-sm font-medium text-gray-700">Expense Date</label>
-                        <input type="date" name="expense_date" id="expense_date" value="{{ old('expense_date', date('Y-m-d')) }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        @error('expense_date')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <label for="expense_date" class="block text-sm font-medium text-gray-700 mb-2">Expense Date</label>
+                        <input type="date" 
+                               id="expense_date" 
+                               name="expense_date" 
+                               value="{{ old('expense_date', now()->format('Y-m-d')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
                     </div>
                 </div>
 
@@ -83,16 +95,15 @@
                     </div>
 
                     <div>
-                        <label for="payment_method" class="block text-sm font-medium text-gray-700">Payment Method</label>
-                        <select name="payment_method" id="payment_method" required
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select name="status" id="status" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="">Select Payment Method</option>
-                            <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
-                            <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                            <option value="cheque" {{ old('payment_method') == 'cheque' ? 'selected' : '' }}>Cheque</option>
-                            <option value="online" {{ old('payment_method') == 'online' ? 'selected' : '' }}>Online Payment</option>
+                            <option value="">Select Status</option>
+                            <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>Approved</option>
+                            <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                         </select>
-                        @error('payment_method')
+                        @error('status')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -119,6 +130,17 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+                </div>
+
+                <!-- Receipt Image Upload -->
+                <div>
+                    <label for="receipt_image" class="block text-sm font-medium text-gray-700">Receipt Image</label>
+                    <input type="file" name="receipt_image" id="receipt_image" accept="image/*"
+                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="mt-1 text-sm text-gray-500">Upload receipt or invoice image (optional)</p>
+                    @error('receipt_image')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Expense Guidelines -->

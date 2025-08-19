@@ -31,6 +31,14 @@
                 <a href="{{ route('admin.loans.edit', $loan) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                     <i class="fas fa-edit mr-2"></i> Edit
                 </a>
+                @if($loan->installments->where('status', 'overdue')->count() > 0 || $loan->installments->where('status', 'pending')->where('due_date', '<', now())->count() > 0)
+                    <button onclick="calculatePenalties()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-calculator mr-2"></i> Calculate Penalties
+                    </button>
+                    <button onclick="waiveAllPenalties()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-hand-paper mr-2"></i> Waive All Penalties
+                    </button>
+                @endif
                 <a href="{{ route('admin.loans.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
                     <i class="fas fa-arrow-left mr-2"></i> Back
                 </a>
@@ -46,7 +54,7 @@
             <div class="space-y-3">
                 <div>
                     <p class="text-sm text-gray-500">Principal Amount</p>
-                    <p class="text-xl font-bold text-gray-900">रू {{ number_format($loan->amount, 2) }}</p>
+                    <p class="text-xl font-bold text-gray-900">रू {{ number_format($loan->approved_amount ?? $loan->requested_amount, 2) }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Interest Rate</p>
@@ -54,19 +62,19 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Loan Term</p>
-                    <p class="font-medium">{{ $loan->term_months }} months</p>
+                    <p class="font-medium">{{ $loan->duration_months }} months</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Monthly Payment</p>
-                    <p class="font-medium text-blue-600">रू {{ number_format(($loan->amount + ($loan->amount * $loan->interest_rate / 100)) / $loan->term_months, 2) }}</p>
+                    <p class="font-medium text-blue-600">रू {{ $loan->duration_months > 0 ? number_format((($loan->approved_amount ?? $loan->requested_amount) + (($loan->approved_amount ?? $loan->requested_amount) * $loan->interest_rate / 100)) / $loan->duration_months, 2) : '0.00' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Total Interest</p>
-                    <p class="font-medium">रू {{ number_format($loan->amount * $loan->interest_rate / 100, 2) }}</p>
+                    <p class="font-medium">रू {{ number_format(($loan->approved_amount ?? $loan->requested_amount) * $loan->interest_rate / 100, 2) }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Total Amount</p>
-                    <p class="font-medium text-green-600">रू {{ number_format($loan->amount + ($loan->amount * $loan->interest_rate / 100), 2) }}</p>
+                    <p class="font-medium text-green-600">रू {{ number_format(($loan->approved_amount ?? $loan->requested_amount) + (($loan->approved_amount ?? $loan->requested_amount) * $loan->interest_rate / 100), 2) }}</p>
                 </div>
             </div>
         </div>
@@ -192,6 +200,8 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penalty</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -207,7 +217,22 @@
                             {{ $installment->due_date->format('M d, Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            रू {{ number_format($installment->amount, 2) }}
+                            रू {{ number_format($installment->total_amount, 2) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            @if($installment->penalty_amount > 0)
+                                <span class="text-red-600 font-semibold">
+                                    रू {{ number_format($installment->penalty_amount, 2) }}
+                                </span>
+                                @if($installment->penalty_waived)
+                                    <span class="text-xs text-gray-500 block">(Waived)</span>
+                                @endif
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            रू {{ number_format($installment->getTotalAmountWithPenalty(), 2) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -219,6 +244,9 @@
                                 @endswitch">
                                 {{ ucfirst($installment->status) }}
                             </span>
+                            @if($installment->isOverdue())
+                                <span class="text-xs text-red-500 block">{{ $installment->calculateDaysOverdue() }} days overdue</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $installment->paid_date ? $installment->paid_date->format('M d, Y') : '-' }}
@@ -228,6 +256,11 @@
                                 <button class="text-green-600 hover:text-green-900 mr-2" onclick="markAsPaid({{ $installment->id }})">
                                     Mark Paid
                                 </button>
+                                @if($installment->penalty_amount > 0 && !$installment->penalty_waived)
+                                    <button class="text-orange-600 hover:text-orange-900 mr-2" onclick="waivePenalty({{ $installment->id }})">
+                                        Waive Penalty
+                                    </button>
+                                @endif
                             @endif
                         </td>
                     </tr>
@@ -245,6 +278,71 @@ function markAsPaid(installmentId) {
         // Implementation for marking installment as paid
         // This would typically make an AJAX call to update the installment
         console.log('Mark installment ' + installmentId + ' as paid');
+    }
+}
+
+function calculatePenalties() {
+    if (confirm('Are you sure you want to calculate penalties for all overdue installments?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.loans.calculate-penalties") }}';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function waiveAllPenalties() {
+    const reason = prompt('Please enter the reason for waiving all penalties:');
+    if (reason && reason.trim() !== '') {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("admin.loans.waive-penalties", $loan) }}';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+        
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reason';
+        reasonInput.value = reason;
+        form.appendChild(reasonInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function waivePenalty(installmentId) {
+    const reason = prompt('Please enter the reason for waiving this penalty:');
+    if (reason && reason.trim() !== '') {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/installments/${installmentId}/waive-penalty`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+        
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reason';
+        reasonInput.value = reason;
+        form.appendChild(reasonInput);
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 </script>

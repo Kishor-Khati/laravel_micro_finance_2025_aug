@@ -22,15 +22,22 @@ class SavingsController extends Controller
     {
         $members = Member::all();
         $savingsTypes = SavingsType::all();
-        return view('admin.savings.create', compact('members', 'savingsTypes'));
+        $branches = \App\Models\Branch::all();
+        return view('admin.savings.create', compact('members', 'savingsTypes', 'branches'));
     }
 
     public function store(Request $request)
     {
+        // Validate the request data directly (English dates)
+        
         $request->validate([
+            'account_number' => 'nullable|string|unique:savings_accounts',
             'member_id' => 'required|exists:members,id',
             'savings_type_id' => 'required|exists:savings_types,id',
+            'branch_id' => 'required|exists:branches,id',
             'balance' => 'required|numeric|min:0',
+            'interest_earned' => 'nullable|numeric|min:0',
+            'opened_date' => 'required|date',
             'status' => 'required|in:active,inactive,closed',
         ]);
         
@@ -39,7 +46,8 @@ class SavingsController extends Controller
         $data = $request->all();
         $data['account_number'] = $this->generateAccountNumber();
         $data['interest_rate'] = $savingsType->interest_rate;
-        $data['opened_date'] = now();
+        
+        // Date is already in correct format from HTML date input
         
         $savingsAccount = SavingsAccount::create($data);
         
@@ -72,23 +80,34 @@ class SavingsController extends Controller
 
     public function edit(SavingsAccount $savingsAccount)
     {
+        // Load savings account data for editing
+        
         $members = Member::all();
         $savingsTypes = SavingsType::all();
-        return view('admin.savings.edit', compact('savingsAccount', 'members', 'savingsTypes'));
+        $branches = \App\Models\Branch::all();
+        return view('admin.savings.edit', compact('savingsAccount', 'members', 'savingsTypes', 'branches'));
     }
 
     public function update(Request $request, SavingsAccount $savingsAccount)
     {
+        // Validate the request data directly (English dates)
+        
         $request->validate([
             'member_id' => 'required|exists:members,id',
             'savings_type_id' => 'required|exists:savings_types,id',
+            'branch_id' => 'required|exists:branches,id',
             'account_number' => 'required|string|unique:savings_accounts,account_number,' . $savingsAccount->id,
             'balance' => 'required|numeric|min:0',
-            'interest_rate' => 'required|numeric|min:0|max:100',
+            'interest_earned' => 'nullable|numeric|min:0',
+            'opened_date' => 'required|date',
             'status' => 'required|in:active,inactive,closed',
         ]);
 
-        $savingsAccount->update($request->all());
+        $data = $request->all();
+        
+        // Date is already in correct format from HTML date input
+        
+        $savingsAccount->update($data);
 
         return redirect()->route('admin.savings.index')->with('success', 'Savings account updated successfully!');
     }

@@ -206,7 +206,7 @@
             <div class="summary-item net">
                 <div class="label">Net Income</div>
                 <div class="amount">{{ number_format($data['final_balance'], 2) }}</div>
-                <div class="description">After bonuses & expenses</div>
+                <div class="description">Raw income after expenses</div>
             </div>
         </div>
         

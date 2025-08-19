@@ -38,7 +38,7 @@
             
             <div class="bg-gray-50 p-3 rounded-lg">
                 <p class="text-sm text-gray-500">Generated On</p>
-                <p class="font-medium">{{ now()->format('M d, Y H:i') }}</p>
+                <p class="font-medium">{{ now()->format('M d, Y') }} {{ now()->format('H:i') }}</p>
             </div>
         </div>
     </div>
@@ -73,7 +73,7 @@
             <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
                 <p class="text-sm text-gray-500 mb-1">Net Income</p>
                 <p class="text-2xl font-bold text-purple-600">{{ number_format($data['final_balance'], 2) }}</p>
-                <p class="text-xs text-gray-500 mt-1">Raw Income - Share Bonuses - Expenses</p>
+                <p class="text-xs text-gray-500 mt-1">Raw income after expenses</p>
             </div>
         </div>
         

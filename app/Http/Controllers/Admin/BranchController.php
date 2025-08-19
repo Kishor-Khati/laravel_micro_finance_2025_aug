@@ -25,9 +25,10 @@ class BranchController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:branches',
             'address' => 'required|string',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'manager_name' => 'nullable|string|max:255',
+            'status' => 'required|in:active,inactive',
         ]);
 
         Branch::create($request->all());
@@ -52,9 +53,10 @@ class BranchController extends Controller
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:branches,code,' . $branch->id,
             'address' => 'required|string',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'manager_name' => 'nullable|string|max:255',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $branch->update($request->all());

@@ -28,14 +28,14 @@ class ReportController extends Controller
     public function financial()
     {
         $data = [
-            'total_loans' => Loan::sum('amount'),
-            'active_loans' => Loan::where('status', 'active')->sum('amount'),
+            'total_loans' => Loan::sum('approved_amount'),
+            'active_loans' => Loan::where('status', 'active')->sum('approved_amount'),
             'total_savings' => SavingsAccount::sum('balance'),
-            'total_deposits' => Transaction::where('type', 'deposit')->sum('amount'),
-            'total_withdrawals' => Transaction::where('type', 'withdrawal')->sum('amount'),
+            'total_deposits' => Transaction::where('transaction_type', 'deposit')->sum('amount'),
+            'total_withdrawals' => Transaction::where('transaction_type', 'withdrawal')->sum('amount'),
             'total_expenses' => Expense::sum('amount'),
-            'monthly_loans' => Loan::whereMonth('created_at', date('m'))->sum('amount'),
-            'monthly_savings' => Transaction::where('type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount'),
+            'monthly_loans' => Loan::whereMonth('created_at', date('m'))->sum('approved_amount'),
+            'monthly_savings' => Transaction::where('transaction_type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount'),
             'monthly_expenses' => Expense::whereMonth('expense_date', date('m'))->sum('amount'),
         ];
 
@@ -45,8 +45,8 @@ class ReportController extends Controller
             $date = now()->subMonths($i);
             $monthlyData[] = [
                 'month' => $date->format('M Y'),
-                'loans' => Loan::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('amount'),
-                'deposits' => Transaction::where('type', 'deposit')->whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('amount'),
+                'loans' => Loan::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('approved_amount'),
+                'deposits' => Transaction::where('transaction_type', 'deposit')->whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('amount'),
                 'expenses' => Expense::whereYear('expense_date', $date->year)->whereMonth('expense_date', $date->month)->sum('amount'),
             ];
         }
@@ -90,10 +90,10 @@ class ReportController extends Controller
             'active_loans' => Loan::where('status', 'active')->count(),
             'closed_loans' => Loan::where('status', 'closed')->count(),
             'defaulted_loans' => Loan::where('status', 'defaulted')->count(),
-            'total_loan_amount' => Loan::sum('amount'),
-            'avg_loan_amount' => Loan::avg('amount'),
+            'total_loan_amount' => Loan::sum('approved_amount'),
+            'avg_loan_amount' => Loan::avg('approved_amount'),
             'loans_by_type' => Loan::with('loanType')->get()->groupBy('loanType.name'),
-            'loans_by_status' => Loan::select('status', DB::raw('count(*) as count'), DB::raw('sum(amount) as total_amount'))
+            'loans_by_status' => Loan::select('status', DB::raw('count(*) as count'), DB::raw('sum(approved_amount) as total_amount'))
                                    ->groupBy('status')->get(),
         ];
 
@@ -104,7 +104,7 @@ class ReportController extends Controller
             $disbursementTrends[] = [
                 'month' => $date->format('M Y'),
                 'count' => Loan::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->count(),
-                'amount' => Loan::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('amount'),
+                'amount' => Loan::whereYear('created_at', $date->year)->whereMonth('created_at', $date->month)->sum('approved_amount'),
             ];
         }
 
@@ -120,7 +120,7 @@ class ReportController extends Controller
         $branchData = $branches->map(function ($branch) {
             return [
                 'branch' => $branch,
-                'total_loans' => $branch->members->flatMap->loans->sum('amount'),
+                'total_loans' => $branch->members->flatMap->loans->sum('approved_amount'),
                 'active_loans' => $branch->members->flatMap->loans->where('status', 'active')->count(),
                 'total_savings' => $branch->members->flatMap->savingsAccounts->sum('balance'),
                 'active_savings_accounts' => $branch->members->flatMap->savingsAccounts->where('status', 'active')->count(),
@@ -134,10 +134,10 @@ class ReportController extends Controller
     {
         $data = [
             'total_transactions' => Transaction::count(),
-            'total_deposits' => Transaction::where('type', 'deposit')->count(),
-            'total_withdrawals' => Transaction::where('type', 'withdrawal')->count(),
-            'deposit_amount' => Transaction::where('type', 'deposit')->sum('amount'),
-            'withdrawal_amount' => Transaction::where('type', 'withdrawal')->sum('amount'),
+            'total_deposits' => Transaction::where('transaction_type', 'deposit')->count(),
+            'total_withdrawals' => Transaction::where('transaction_type', 'withdrawal')->count(),
+            'deposit_amount' => Transaction::where('transaction_type', 'deposit')->sum('amount'),
+            'withdrawal_amount' => Transaction::where('transaction_type', 'withdrawal')->sum('amount'),
             'avg_transaction_amount' => Transaction::avg('amount'),
             'today_transactions' => Transaction::whereDate('created_at', today())->count(),
             'monthly_transactions' => Transaction::whereMonth('created_at', date('m'))->count(),
@@ -151,8 +151,8 @@ class ReportController extends Controller
         for ($date = $startOfMonth->copy(); $date <= $endOfMonth; $date->addDay()) {
             $dailyTrends[] = [
                 'date' => $date->format('M d'),
-                'deposits' => Transaction::where('type', 'deposit')->whereDate('created_at', $date)->sum('amount'),
-                'withdrawals' => Transaction::where('type', 'withdrawal')->whereDate('created_at', $date)->sum('amount'),
+                'deposits' => Transaction::where('transaction_type', 'deposit')->whereDate('created_at', $date)->sum('amount'),
+            'withdrawals' => Transaction::where('transaction_type', 'withdrawal')->whereDate('created_at', $date)->sum('amount'),
                 'count' => Transaction::whereDate('created_at', $date)->count(),
             ];
         }
@@ -173,29 +173,29 @@ class ReportController extends Controller
             ],
             'loans' => [
                 'total_count' => Loan::count(),
-                'total_amount' => Loan::sum('amount'),
+                'total_amount' => Loan::sum('approved_amount'),
                 'active_count' => Loan::where('status', 'active')->count(),
-                'this_month' => Loan::whereMonth('created_at', date('m'))->sum('amount'),
-                'growth' => $this->calculateGrowth(
-                    Loan::whereMonth('created_at', date('m'))->sum('amount'),
-                    Loan::whereMonth('created_at', date('m', strtotime('-1 month')))->sum('amount')
+                'this_month' => Loan::whereMonth('created_at', date('m'))->sum('approved_amount'),
+                'growth' => (
+                    Loan::whereMonth('created_at', date('m'))->sum('approved_amount') -
+                    Loan::whereMonth('created_at', date('m', strtotime('-1 month')))->sum('approved_amount')
                 ),
             ],
             'savings' => [
                 'total_accounts' => SavingsAccount::count(),
                 'total_balance' => SavingsAccount::sum('balance'),
                 'active_accounts' => SavingsAccount::where('status', 'active')->count(),
-                'this_month' => Transaction::where('type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount'),
-                'growth' => $this->calculateGrowth(
-                    Transaction::where('type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount'),
-                    Transaction::where('type', 'deposit')->whereMonth('created_at', date('m', strtotime('-1 month')))->sum('amount')
-                ),
+                'this_month' => Transaction::where('transaction_type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount'),
+            'growth' => (
+                Transaction::where('transaction_type', 'deposit')->whereMonth('created_at', date('m'))->sum('amount') -
+                Transaction::where('transaction_type', 'deposit')->whereMonth('created_at', date('m', strtotime('-1 month')))->sum('amount')
+            ),
             ],
             'transactions' => [
                 'total_count' => Transaction::count(),
                 'this_month' => Transaction::whereMonth('created_at', date('m'))->count(),
-                'deposit_amount' => Transaction::where('type', 'deposit')->sum('amount'),
-                'withdrawal_amount' => Transaction::where('type', 'withdrawal')->sum('amount'),
+                'deposit_amount' => Transaction::where('transaction_type', 'deposit')->sum('amount'),
+            'withdrawal_amount' => Transaction::where('transaction_type', 'withdrawal')->sum('amount'),
             ],
         ];
 
