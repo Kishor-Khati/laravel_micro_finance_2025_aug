@@ -49,7 +49,10 @@ class BranchSeeder extends Seeder
         ];
 
         foreach ($branches as $branch) {
-            Branch::create($branch);
+            Branch::updateOrCreate(
+                ['code' => $branch['code']], // Find by unique code
+                $branch // Update or create with this data
+            );
         }
     }
 }

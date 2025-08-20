@@ -122,6 +122,38 @@
                         @endif
                     </div>
                 @endif
+                
+                <!-- Family Members Section -->
+                @if($familyMembers && $familyMembers->count() > 0)
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500 mb-2">Family Members</p>
+                        <div class="space-y-2">
+                            @foreach($familyMembers as $familyMember)
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        @if($familyMember->profile_image)
+                                            <img src="{{ asset('storage/' . $familyMember->profile_image) }}" 
+                                                 alt="{{ $familyMember->full_name }}" 
+                                                 class="w-8 h-8 rounded-full object-cover mr-3">
+                                        @else
+                                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-gray-600 text-sm"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="font-medium text-gray-900">{{ $familyMember->full_name }}</p>
+                                            <p class="text-sm text-gray-500">{{ $familyMember->member_number }}</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('admin.members.show', $familyMember) }}" 
+                                       class="text-blue-600 hover:text-blue-800 text-sm">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 

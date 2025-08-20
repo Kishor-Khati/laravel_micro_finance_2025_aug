@@ -4,12 +4,25 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Member;
+use App\Models\Branch;
 use Carbon\Carbon;
 
 class MemberSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get branch IDs dynamically
+        $kathmandu = Branch::where('code', 'KTM001')->first();
+        $pokhara = Branch::where('code', 'PKR001')->first();
+        $chitwan = Branch::where('code', 'CHT001')->first();
+        $butwal = Branch::where('code', 'BTW001')->first();
+
+        // Check if branches exist
+        if (!$kathmandu || !$pokhara || !$chitwan || !$butwal) {
+            $this->command->error('Required branches not found. Please run BranchSeeder first.');
+            return;
+        }
+
         $members = [
             [
                 'member_number' => 'MEM00001',
@@ -24,7 +37,7 @@ class MemberSeeder extends Seeder
                 'address' => 'Kathmandu-32, New Baneshwor',
                 'occupation' => 'Farmer',
                 'monthly_income' => 25000,
-                'branch_id' => 1,
+                'branch_id' => $kathmandu->id,
                 'guardian_name' => 'Dhan Bahadur Shrestha',
                 'guardian_phone' => '9841234568',
                 'guardian_relation' => 'Father',
@@ -45,7 +58,7 @@ class MemberSeeder extends Seeder
                 'address' => 'Pokhara-15, Lakeside',
                 'occupation' => 'Shop Owner',
                 'monthly_income' => 30000,
-                'branch_id' => 2,
+                'branch_id' => $pokhara->id,
                 'guardian_name' => 'Man Bahadur Gurung',
                 'guardian_phone' => '9841234569',
                 'guardian_relation' => 'Husband',
@@ -66,7 +79,7 @@ class MemberSeeder extends Seeder
                 'address' => 'Chitwan-10, Bharatpur',
                 'occupation' => 'Teacher',
                 'monthly_income' => 35000,
-                'branch_id' => 3,
+                'branch_id' => $chitwan->id,
                 'guardian_name' => 'Krishna Prasad Poudel',
                 'guardian_phone' => '9841234570',
                 'guardian_relation' => 'Father',
@@ -87,7 +100,7 @@ class MemberSeeder extends Seeder
                 'address' => 'Butwal-12, Traffic Chowk',
                 'occupation' => 'Tailor',
                 'monthly_income' => 20000,
-                'branch_id' => 4,
+                'branch_id' => $butwal->id,
                 'guardian_name' => 'Pemba Tamang',
                 'guardian_phone' => '9841234571',
                 'guardian_relation' => 'Husband',
@@ -108,7 +121,7 @@ class MemberSeeder extends Seeder
                 'address' => 'Kathmandu-25, Thamel',
                 'occupation' => 'Driver',
                 'monthly_income' => 28000,
-                'branch_id' => 1,
+                'branch_id' => $kathmandu->id,
                 'guardian_name' => 'Dil Bahadur Rai',
                 'guardian_phone' => '9841234572',
                 'guardian_relation' => 'Father',
@@ -119,7 +132,10 @@ class MemberSeeder extends Seeder
         ];
 
         foreach ($members as $member) {
-            Member::create($member);
+            Member::updateOrCreate(
+                ['member_number' => $member['member_number']], // Find by unique member number
+                $member // Update or create with this data
+            );
         }
     }
 }

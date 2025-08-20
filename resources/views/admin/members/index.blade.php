@@ -105,13 +105,22 @@
                         <span class="text-base font-bold text-gray-800">{{ $members->firstItem() + $index }}</span>
                     </td>
                     <td class="px-6 py-3">
+                        <!-- In the member list display -->
                         <div class="flex items-center">
-                            <div class="relative inline-flex items-center justify-center w-12 h-12 overflow-hidden bg-blue-100 rounded-full border-2 border-blue-200 mr-4">
-                                <span class="font-bold text-blue-700 text-base">{{ strtoupper(substr($member->first_name, 0, 1) . substr($member->last_name, 0, 1)) }}</span>
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mr-3">
+                                @if($member->profile_image && file_exists(public_path('images/member-img/' . $member->profile_image)))
+                                    <img src="{{ asset('images/member-img/' . $member->profile_image) }}" 
+                                         alt="Profile" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-blue-500 flex items-center justify-center text-white font-semibold text-xs">
+                                        {{ $member->avatar_initials }}
+                                    </div>
+                                @endif
                             </div>
                             <div>
-                                <div class="text-lg font-bold text-gray-900">{{ $member->first_name }} {{ $member->last_name }}</div>
-                                <div class="font-semibold text-gray-600 text-base">Member ID: {{ $member->member_number }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $member->full_name ?? $member->first_name . ' ' . $member->last_name }}</div>
+                                <div class="text-sm text-gray-500">ID: {{ $member->member_number }}</div>
                             </div>
                         </div>
                     </td>

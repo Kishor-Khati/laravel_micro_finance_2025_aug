@@ -73,7 +73,10 @@ class LoanTypeSeeder extends Seeder
         ];
 
         foreach ($loanTypes as $loanType) {
-            LoanType::create($loanType);
+            LoanType::updateOrCreate(
+                ['code' => $loanType['code']], // Find by unique code
+                $loanType // Update or create with this data
+            );
         }
     }
 }

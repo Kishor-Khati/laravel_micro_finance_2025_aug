@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\Branch;
 use App\Exports\IndividualMemberExport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -21,10 +22,12 @@ class MemberController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
+                $q->where('full_name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('member_number', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('phone_secondary', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
@@ -144,41 +147,60 @@ class MemberController extends Controller
     public function create()
     {
         $branches = Branch::active()->get();
-        return view('admin.members.create', compact('branches'));
+        $existingMembers = Member::active()->get(); // For family members selection
+        return view('admin.members.create', compact('branches', 'existingMembers'));
     }
 
     public function store(Request $request)
     {
-        // Set default membership_date to today if empty
-        $data = $request->all();
-        if (empty($data['membership_date'])) {
-            $data['membership_date'] = now()->format('Y-m-d');
-            $request->merge($data);
-        }
+        // Handle member number generation
+        $memberNumberData = $this->handleMemberNumber($request);
         
-        $request->validate([
-            'member_number' => 'required|string|unique:members',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+        $validationRules = [
+            // Always validate member_number for uniqueness, regardless of auto-generation
+            'member_number' => 'required|string|unique:members,member_number',
+            'member_number_auto_generated' => 'boolean',
+            'full_name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255', // Keep for backward compatibility
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:members',
             'phone' => 'required|string|max:20',
+            'phone_secondary' => 'nullable|string|max:20',
             'address' => 'required|string',
             'date_of_birth' => 'nullable|date',
             'gender' => 'required|in:male,female,other',
+            'citizenship_number' => 'nullable|string|unique:members',
             'occupation' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0',
             'branch_id' => 'required|exists:branches,id',
-            'citizenship_number' => 'required|string|unique:members',
             'guardian_name' => 'nullable|string|max:255',
             'guardian_phone' => 'nullable|string|max:20',
             'guardian_relation' => 'nullable|string|max:255',
+            'family_members' => 'nullable|array',
+            'family_members.*' => 'nullable|exists:members,id',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'kyc_documents' => 'nullable|array',
+            'kyc_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
             'status' => 'nullable|in:active,inactive,suspended,kyc_pending',
             'kyc_status' => 'nullable|in:pending,verified,rejected',
-            'membership_date' => 'required|date',
-        ]);
-
+            'membership_date' => 'nullable|date',
+        ];
+        
+        $validatedData = $request->validate($validationRules);
+        
+        // Set defaults
+        $validatedData['member_number'] = $memberNumberData['member_number'];
+        $validatedData['member_number_auto_generated'] = $memberNumberData['auto_generated'];
+        $validatedData['membership_date'] = $validatedData['membership_date'] ?? now()->format('Y-m-d');
+        $validatedData['status'] = $validatedData['status'] ?? 'active';
+        $validatedData['kyc_status'] = $validatedData['kyc_status'] ?? 'pending';
+        
+        // Handle file uploads
+        $validatedData = $this->handleFileUploads($request, $validatedData);
+        
         try {
-            Member::create($data);
+            Member::create($validatedData);
             return redirect()->route('admin.members.index')->with('success', 'Member created successfully!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to create member: ' . $e->getMessage())->withInput();
@@ -188,47 +210,70 @@ class MemberController extends Controller
     public function show(Member $member)
     {
         $member->load(['branch', 'loans', 'savingsAccounts']);
-        return view('admin.members.show', compact('member'));
+        
+        // Load family members if they exist
+        $familyMembers = collect();
+        if ($member->family_members && is_array($member->family_members)) {
+            $familyMembers = Member::whereIn('id', $member->family_members)->get();
+        }
+        
+        return view('admin.members.show', compact('member', 'familyMembers'));
     }
 
     public function edit(Member $member)
     {
         $branches = Branch::all();
-        return view('admin.members.edit', compact('member', 'branches'));
+        $existingMembers = Member::where('id', '!=', $member->id)->active()->get(); // Exclude current member
+        return view('admin.members.edit', compact('member', 'branches', 'existingMembers'));
     }
 
     public function update(Request $request, Member $member)
     {
-        // Set default membership_date to existing value if empty
-        $data = $request->all();
-        if (empty($data['membership_date'])) {
-            $data['membership_date'] = $member->membership_date->format('Y-m-d');
-            $request->merge($data);
-        }
+        // Handle member number generation
+        $memberNumberData = $this->handleMemberNumber($request, $member);
         
-        $request->validate([
+        $validationRules = [
+            // Always validate member_number for uniqueness, excluding current member
             'member_number' => 'required|string|unique:members,member_number,' . $member->id,
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'member_number_auto_generated' => 'boolean',
+            'full_name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:members,email,' . $member->id,
             'phone' => 'required|string|max:20',
+            'phone_secondary' => 'nullable|string|max:20',
             'address' => 'required|string',
             'date_of_birth' => 'nullable|date',
             'gender' => 'required|in:male,female,other',
+            'citizenship_number' => 'nullable|string|unique:members,citizenship_number,' . $member->id,
             'occupation' => 'nullable|string|max:255',
             'monthly_income' => 'nullable|numeric|min:0',
             'branch_id' => 'required|exists:branches,id',
-            'citizenship_number' => 'required|string|unique:members,citizenship_number,' . $member->id,
             'guardian_name' => 'nullable|string|max:255',
             'guardian_phone' => 'nullable|string|max:20',
             'guardian_relation' => 'nullable|string|max:255',
+            'family_members' => 'nullable|array',
+            'family_members.*' => 'nullable|exists:members,id',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'kyc_documents' => 'nullable|array',
+            'kyc_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
             'status' => 'required|in:active,inactive,suspended,kyc_pending',
             'kyc_status' => 'required|in:pending,verified,rejected',
             'membership_date' => 'required|date',
-        ]);
-
+        ];
+        
+        $validatedData = $request->validate($validationRules);
+        
+        // Set member number data
+        $validatedData['member_number'] = $memberNumberData['member_number'];
+        $validatedData['member_number_auto_generated'] = $memberNumberData['auto_generated'];
+        
+        // Handle file uploads
+        $validatedData = $this->handleFileUploads($request, $validatedData, $member);
+        
         try {
-            $member->update($data);
+            $member->update($validatedData);
             return redirect()->route('admin.members.index')->with('success', 'Member updated successfully!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to update member: ' . $e->getMessage())->withInput();
@@ -238,6 +283,24 @@ class MemberController extends Controller
     public function destroy(Member $member)
     {
         try {
+            // Delete profile image from public/images/member-img
+            if ($member->profile_image) {
+                $imagePath = public_path('images/member-img/' . $member->profile_image);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+            
+            // Delete KYC documents from public/images/kyc-docs
+            if ($member->kyc_documents) {
+                foreach ($member->kyc_documents as $filename) {
+                    $filePath = public_path('images/kyc-docs/' . $filename);
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                }
+            }
+            
             $member->delete();
             return redirect()->route('admin.members.index')->with('success', 'Member deleted successfully!');
         } catch (\Exception $e) {
@@ -269,5 +332,192 @@ class MemberController extends Controller
         $filename = 'member_' . $member->member_id . '_' . date('Y-m-d') . '.pdf';
         
         return $pdf->download($filename);
+    }
+
+    /**
+     * Generate member number for AJAX request
+     */
+    public function generateNumber($branchId)
+    {
+        try {
+            $branch = Branch::findOrFail($branchId);
+            
+            // Generate unique member number with retry logic
+            $memberNumber = Member::generateMemberNumber();
+            $attempts = 0;
+            $maxAttempts = 10;
+            
+            while (Member::where('member_number', $memberNumber)->exists() && $attempts < $maxAttempts) {
+                $memberNumber = Member::generateMemberNumber();
+                $attempts++;
+            }
+            
+            if ($attempts >= $maxAttempts) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to generate unique member number. Please try again.'
+                ], 500);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'member_number' => $memberNumber,
+                'branch' => $branch->name
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate member number: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a specific KYC document
+     */
+    public function deleteKycDocument(Member $member, $index)
+    {
+        try {
+            $kycDocuments = $member->kyc_documents ?? [];
+            
+            // Check if the index exists
+            if (!isset($kycDocuments[$index])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
+            }
+            
+            // Get the filename and file path
+            $filename = $kycDocuments[$index];
+            $filePath = public_path('images/kyc-docs/' . $filename);
+            
+            // Delete the file from public directory
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            
+            // Remove the document from the array
+            unset($kycDocuments[$index]);
+            
+            // Reindex the array to maintain sequential indices
+            $kycDocuments = array_values($kycDocuments);
+            
+            // Update the member record
+            $member->update(['kyc_documents' => $kycDocuments]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Document deleted successfully',
+                'remaining_documents' => count($kycDocuments)
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete document: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Handle member number generation logic
+     */
+    private function handleMemberNumber(Request $request, Member $member = null)
+    {
+        $autoGenerate = $request->boolean('member_number_auto_generated', true);
+        
+        if ($autoGenerate) {
+            // Generate new member number with uniqueness guarantee
+            $memberNumber = Member::generateMemberNumber();
+            
+            // Ensure uniqueness with retry logic
+            $attempts = 0;
+            $maxAttempts = 10;
+            
+            while (Member::where('member_number', $memberNumber)->exists() && $attempts < $maxAttempts) {
+                $memberNumber = Member::generateMemberNumber();
+                $attempts++;
+            }
+            
+            if ($attempts >= $maxAttempts) {
+                throw new \Exception('Unable to generate unique member number after multiple attempts');
+            }
+        } else {
+            // Use provided member number or fallback to current member number
+            $memberNumber = $request->input('member_number');
+            
+            // If no manual number provided, use existing or generate new
+            if (empty($memberNumber)) {
+                if ($member && $member->member_number) {
+                    $memberNumber = $member->member_number;
+                } else {
+                    $memberNumber = Member::generateMemberNumber();
+                    // Ensure uniqueness for fallback generation
+                    while (Member::where('member_number', $memberNumber)->exists()) {
+                        $memberNumber = Member::generateMemberNumber();
+                    }
+                }
+            }
+        }
+        
+        return [
+            'member_number' => $memberNumber,
+            'auto_generated' => $autoGenerate
+        ];
+    }
+    
+    /**
+     * Handle file uploads for profile image and KYC documents
+     */
+    private function handleFileUploads(Request $request, array $validatedData, Member $member = null)
+    {
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            // Create directory if it doesn't exist
+            $imageDir = public_path('images/member-img');
+            if (!file_exists($imageDir)) {
+                mkdir($imageDir, 0755, true);
+            }
+            
+            // Delete old profile image if updating
+            if ($member && $member->profile_image) {
+                $oldImagePath = public_path('images/member-img/' . $member->profile_image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            
+            $profileImage = $request->file('profile_image');
+            $filename = time() . '_' . $profileImage->getClientOriginalName();
+            $profileImage->move($imageDir, $filename);
+            $validatedData['profile_image'] = $filename;
+        }
+        
+        // Handle KYC documents upload - IMPROVED VERSION
+        if ($request->hasFile('kyc_documents')) {
+            // Create directory if it doesn't exist
+            $kycDir = public_path('images/kyc-docs');
+            if (!file_exists($kycDir)) {
+                mkdir($kycDir, 0755, true);
+            }
+            
+            $kycDocuments = [];
+            
+            foreach ($request->file('kyc_documents') as $document) {
+                $filename = time() . '_' . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move($kycDir, $filename);
+                $kycDocuments[] = $filename;
+            }
+            
+            // Always append to existing documents when updating
+            if ($member && $member->kyc_documents) {
+                $validatedData['kyc_documents'] = array_merge($member->kyc_documents, $kycDocuments);
+            } else {
+                $validatedData['kyc_documents'] = $kycDocuments;
+            }
+        }
+        
+        return $validatedData;
     }
 }

@@ -68,7 +68,10 @@ class SavingsTypeSeeder extends Seeder
         ];
 
         foreach ($savingsTypes as $savingsType) {
-            SavingsType::create($savingsType);
+            SavingsType::updateOrCreate(
+                ['code' => $savingsType['code']], // Find by unique code
+                $savingsType // Update or create with this data
+            );
         }
     }
 }

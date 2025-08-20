@@ -18,19 +18,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
-
-Route::get('/test-member-edit', function () {
-    $member = \App\Models\Member::find(1);
-    return view('members.edit', compact('member'));
-});
-
 // Language switching
 Route::post('/language/switch', [LanguageController::class, 'switch'])->name('language.switch');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Removed the following test route:
+// Route::get('/test-member-edit', function () {
+//     $member = \App\Models\Member::find(1);
+//     return view('members.edit', compact('member'));
+// });
 
 
 
@@ -79,6 +78,8 @@ Route::get('/reports/summary/pdf', [ReportsController::class, 'exportSummaryPdf'
     
     // Members Management
     Route::resource('members', AdminMemberController::class);
+    Route::get('/members/generate-number/{branchId}', [AdminMemberController::class, 'generateNumber'])->name('members.generate-number');
+    Route::delete('/members/{member}/kyc-document/{index}', [AdminMemberController::class, 'deleteKycDocument'])->name('admin.members.delete-kyc-document');
     Route::get('/members/{member}/export/excel', [AdminMemberController::class, 'exportExcel'])->name('members.export.excel');
     Route::get('/members/{member}/export/pdf', [AdminMemberController::class, 'exportPdf'])->name('members.export.pdf');
     

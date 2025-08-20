@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -23,6 +24,15 @@ class UserSeeder extends Seeder
             return;
         }
         
+        // Get branch IDs dynamically
+        $kathmanduBranch = Branch::where('code', 'KTM001')->first();
+        $pokharaBranch = Branch::where('code', 'PKR001')->first();
+        
+        if (!$kathmanduBranch || !$pokharaBranch) {
+            $this->command->info('Please run the BranchSeeder first!');
+            return;
+        }
+        
         $users = [
             [
                 'name' => 'Super Admin',
@@ -38,7 +48,7 @@ class UserSeeder extends Seeder
                 'email' => 'manager.ktm@microfinance.com',
                 'password' => Hash::make('password'),
                 'role_id' => $branchManagerRole->id,
-                'branch_id' => 1, // Kathmandu branch
+                'branch_id' => $kathmanduBranch->id,
                 'employee_id' => 'EMP002',
                 'phone' => '9876543211',
                 'status' => 'active',
@@ -48,7 +58,7 @@ class UserSeeder extends Seeder
                 'email' => 'manager.pkr@microfinance.com',
                 'password' => Hash::make('password'),
                 'role_id' => $branchManagerRole->id,
-                'branch_id' => 2, // Pokhara branch
+                'branch_id' => $pokharaBranch->id,
                 'employee_id' => 'EMP003',
                 'phone' => '9876543212',
                 'status' => 'active',
@@ -58,7 +68,7 @@ class UserSeeder extends Seeder
                 'email' => 'field.ktm@microfinance.com',
                 'password' => Hash::make('password'),
                 'role_id' => $fieldOfficerRole->id,
-                'branch_id' => 1,
+                'branch_id' => $kathmanduBranch->id,
                 'employee_id' => 'EMP004',
                 'phone' => '9876543213',
                 'status' => 'active',
@@ -68,7 +78,7 @@ class UserSeeder extends Seeder
                 'email' => 'accountant.ktm@microfinance.com',
                 'password' => Hash::make('password'),
                 'role_id' => $accountantRole->id,
-                'branch_id' => 1,
+                'branch_id' => $kathmanduBranch->id,
                 'employee_id' => 'EMP005',
                 'phone' => '9876543214',
                 'status' => 'active',
